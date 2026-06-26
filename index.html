@@ -403,9 +403,8 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
       <button class="btn bp" style="margin-top:10px" onclick="savePIN()">Enregistrer le PIN</button>
     </div>
     <div class="card">
-      <div class="ctit">📧 Paramètres</div>
-      <div class="fld"><label>Email pharmacien</label><input type="email" id="conf-email" class="fi" placeholder="pharmacien@clinique.fr" onchange="saveConf()"></div>
-      <div class="fld" style="margin-top:10px"><label>Nom de la clinique</label><input type="text" id="conf-clin" class="fi" placeholder="Clinique du Château de Florans" onchange="saveConf()"></div>
+      <div class="ctit">🏥 Nom de la clinique</div>
+      <div class="fld"><label>Nom affiché dans l'app et les emails</label><input type="text" id="conf-clin" class="fi" placeholder="Clinique du Château de Florans" onchange="saveConf()"></div>
     </div>
     <div class="card">
       <div class="ctit">👥 Infirmiers autorisés</div>
@@ -816,10 +815,11 @@ function lpFinalize(){
   document.getElementById('f-loc').value=code;
   var trig=document.getElementById('loc-trig-txt');
   trig.textContent=label;
-  trig.style.color='var(--acc)';
+  var ccf=getCaseColor(code);
+  trig.style.color=ccf.border;
   trig.style.fontFamily="'JetBrains Mono',monospace";
   trig.style.fontWeight='700';
-  document.getElementById('loc-trig').style.borderColor='var(--acc)';
+  document.getElementById('loc-trig').style.borderColor=ccf.border;
   closeModal('mloc');
 }
 
@@ -1081,7 +1081,6 @@ function renderP(){
 function renderC(){
   loadEJSFields();
   var conf=getConf();
-  document.getElementById('conf-email').value=conf.email||'';
   document.getElementById('conf-clin').value=conf.clin||'Clinique Château de Florans';
   var meds=getMeds().slice().sort(function(a,b){ return a.nom.localeCompare(b.nom); });
   document.getElementById('med-count').textContent=meds.length;
@@ -1106,10 +1105,9 @@ function renderC(){
 }
 function saveConf(){
   var c=getConf();
-  c.email=document.getElementById('conf-email').value;
   c.clin=document.getElementById('conf-clin').value;
   setConf(c);
-  document.getElementById('clinique-name').textContent=c.clin||'Clinique';
+  document.getElementById('clinique-name').textContent=c.clin||'Clinique du Château de Florans';
 }
 function savePIN(){
   var np=document.getElementById('new-pin').value.trim();
@@ -1198,10 +1196,12 @@ function openEditMed(id){
   document.getElementById('f-loc').value=m.localisation;
   var trig=document.getElementById('loc-trig-txt');
   trig.textContent=formatLoc(m.localisation);
-  trig.style.color='var(--acc)';
+  var cc2=getCaseColor(m.localisation);
+  trig.style.color=cc2.border;
   trig.style.fontFamily="'JetBrains Mono',monospace";
   trig.style.fontWeight='700';
-  document.getElementById('loc-trig').style.borderColor='var(--acc)';
+  document.getElementById('loc-trig').style.borderColor=cc2.border;
+  document.getElementById('loc-trig').style.background=cc2.bg==='#ffffff'?'rgba(255,255,255,0.1)':cc2.bg==='#ffd740'?'rgba(255,215,64,0.15)':cc2.bg==='#3478f6'?'rgba(52,120,246,0.15)':cc2.bg==='#ff2040'?'rgba(255,32,64,0.15)':'transparent';
   openModal('mm');
 }
 function saveMed(){
@@ -1228,11 +1228,10 @@ function saveMed(){
   setMeds(meds); closeModal('mm'); renderC(); renderR(); renderS(); renderP(); renderI();
 }
 function confirmDel(id,name){
-  if(!confirm('Supprimer "'+name+'" de l\'armoire ?\n\nCette action est irréversible.')) return;
-  if(!confirm('CONFIRMATION FINALE\n\nSupprimer définitivement "'+name+'" ?')) return;
+  if(!confirm('Supprimer "'+name+'" ?')) return;
   setMeds(getMeds().filter(function(x){ return x.id!==id; }));
   renderC(); renderR(); renderS(); renderP(); renderI();
-  toast('🗑 Supprimé');
+  toast('Supprimé');
 }
 
 // ── NURSES ────────────────────────────────────────────────────────────────────
@@ -1653,10 +1652,9 @@ function saveStup(){
 }
 
 function confirmDelStup(id,nom){
-  if(!confirm('Supprimer "'+nom+'" du coffre ?\n\nCette action est irréversible.')) return;
-  if(!confirm('CONFIRMATION FINALE\n\nSupprimer définitivement "'+nom+'" ?')) return;
+  if(!confirm('Supprimer "'+nom+'" du coffre ?\nCette action est irréversible.')) return;
   setStups(getStups().filter(function(x){ return x.id!==id; }));
-  renderStup(); toast('🗑 Supprimé');
+  renderStup(); toast('Supprimé');
 }
 
 function emailStup(){
