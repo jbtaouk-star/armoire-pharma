@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>PharmaArmoire</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+:root{--bg:#080c14;--surf:#0f1520;--card:#141c2e;--bdr:#1e2a45;--acc:#4a8cff;--grn:#00d68f;--wrn:#ffb830;--red:#ff4560;--txt:#dce4f5;--mut:#6878a0;--r:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt)}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden}
+.screen.on{display:flex}
+/* VEILLE */
+#sv{align-items:center;justify-content:center;background:radial-gradient(ellipse 80% 60% at 50% 40%,#0d1e4a 0%,var(--bg) 70%);cursor:pointer;user-select:none}
+.vp{display:flex;flex-direction:column;align-items:center;gap:28px;animation:breathe 3s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.vi{width:110px;height:110px;border-radius:28px;background:linear-gradient(135deg,#1a3a8f,#3d70e8);display:grid;place-items:center;font-size:52px;box-shadow:0 0 60px rgba(74,140,255,.35)}
+.vt{font-size:28px;font-weight:800;letter-spacing:-.5px;text-align:center}
+.vs{font-size:15px;color:var(--mut);text-align:center}
+.vtap{margin-top:16px;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--acc);border:1px solid rgba(74,140,255,.3);padding:10px 28px;border-radius:40px;animation:pb 2s ease infinite}
+@keyframes pb{0%,100%{box-shadow:0 0 0 0 rgba(74,140,255,.4)}50%{box-shadow:0 0 0 8px rgba(74,140,255,0)}}
+/* ROLE */
+#sr{align-items:center;justify-content:center;gap:24px;background:var(--bg)}
+.rg{display:flex;flex-direction:column;gap:16px;width:min(360px,92vw)}
+.rtit{font-size:20px;font-weight:700;text-align:center;margin-bottom:8px}
+.rbtn{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:22px 20px;display:flex;align-items:center;gap:18px;cursor:pointer;transition:border-color .2s;text-align:left}
+.rbtn:hover{border-color:var(--acc)}
+.rbi{font-size:36px;width:56px;height:56px;background:var(--surf);border-radius:12px;display:grid;place-items:center;flex-shrink:0}
+.rbl{font-size:17px;font-weight:700}
+.rbs{font-size:12px;color:var(--mut);margin-top:3px}
+.bk{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--mut);font-size:13px;font-family:'Inter',sans-serif;cursor:pointer;padding:8px 0}
+.bk:hover{color:var(--txt)}
+/* TOPBAR */
+.topbar{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--surf);border-bottom:1px solid var(--bdr);flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:700;flex:1}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;padding:12px 18px;transition:opacity .15s,transform .1s}
+.btn:active{transform:scale(.97)}
+.bp{background:var(--acc);color:#fff;width:100%;padding:15px;font-size:15px;border-radius:12px}
+.bp:hover{opacity:.88}
+.bg{background:transparent;color:var(--mut);border:1px solid var(--bdr)}
+.bg:hover{color:var(--txt);border-color:var(--acc)}
+.btn-g{background:var(--grn);color:#070f1a}
+.btn-w{background:var(--wrn);color:#070f1a}
+.btn-r{background:var(--red);color:#fff}
+.bs{padding:7px 14px;font-size:13px;border-radius:8px}
+.bfw{width:100%}
+/* FORMS */
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld label{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.6px}
+.fi{background:var(--bg);border:1px solid var(--bdr);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:15px;padding:12px 14px;outline:none;transition:border-color .2s;width:100%}
+.fi:focus{border-color:var(--acc)}
+.fi option{background:var(--card)}
+/* IDE */
+#si{background:var(--bg)}
+.idec{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.sw{position:relative}
+.sw input{width:100%;background:var(--surf);border:1px solid var(--bdr);border-radius:12px;color:var(--txt);font-family:'Inter',sans-serif;font-size:16px;padding:14px 16px 14px 46px;outline:none;transition:border-color .2s}
+.sw input:focus{border-color:var(--acc)}
+.sw .si2{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--mut)}
+.ddl{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;max-height:280px;overflow-y:auto}
+.ddi{padding:13px 16px;cursor:pointer;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;transition:background .15s}
+.ddi:last-child{border-bottom:none}
+.ddi:hover{background:rgba(74,140,255,.1)}
+.ddn{font-size:15px;font-weight:600}
+.dds{font-size:11px;color:var(--mut);margin-top:2px}
+.ddc{font-size:11px;font-weight:600;color:var(--acc);background:rgba(74,140,255,.1);padding:2px 8px;border-radius:20px}
+/* QTY */
+.qc{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:18px}
+.qmn{font-size:18px;font-weight:700}
+.qms{font-size:13px;color:var(--mut);margin-top:2px}
+.qu{font-size:13px;color:var(--acc);font-weight:600}
+.qctl{display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 0}
+.qb{width:52px;height:52px;border:1px solid var(--bdr);background:var(--surf);color:var(--txt);border-radius:12px;font-size:26px;cursor:pointer;display:grid;place-items:center}
+.qb:hover{border-color:var(--acc)}
+.qi{width:80px;text-align:center;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;padding:10px;outline:none}
+/* LOC DISPLAY */
+.lcard{background:linear-gradient(135deg,#0d2a5e,#0f1e42);border:1px solid rgba(74,140,255,.35);border-radius:var(--r);padding:22px;display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center}
+.lcode{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--mut);letter-spacing:2px;opacity:.7}
+.lfmt{font-size:22px;font-weight:700;color:var(--acc);text-align:center;line-height:1.5}
+.llbl{font-size:12px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.8px}
+.ldet{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.lchip{background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:8px;padding:8px 14px;font-size:13px}
+.lchip strong{display:block;font-size:11px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.ok-banner{background:rgba(0,214,143,.1);border:1px solid rgba(0,214,143,.3);border-radius:10px;padding:14px 16px;font-size:14px;font-weight:600;color:var(--grn);display:flex;align-items:center;gap:10px}
+/* PIN */
+#spin{align-items:center;justify-content:center;background:var(--bg)}
+.pinbox{width:min(320px,92vw);background:var(--surf);border:1px solid var(--bdr);border-radius:20px;padding:32px 28px;display:flex;flex-direction:column;gap:20px;align-items:center}
+.pintit{font-size:18px;font-weight:700}
+.pindots{display:flex;gap:14px;padding:8px 0}
+.pd{width:14px;height:14px;border-radius:50%;background:var(--bdr);transition:background .15s}
+.pd.on{background:var(--acc)}
+.pingrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.pk{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:18px;font-size:20px;font-weight:700;cursor:pointer;text-align:center;transition:background .15s}
+.pk:hover{background:#1e2d4a}
+.pinerr{color:var(--red);font-size:13px;font-weight:600}
+/* PHARMACIEN */
+#sph{background:var(--bg)}
+.tabbar{display:flex;background:var(--surf);border-bottom:1px solid var(--bdr);overflow-x:auto;flex-shrink:0}
+.tab{flex:1;min-width:60px;padding:10px 4px 8px;border:none;background:transparent;color:var(--mut);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;display:flex;flex-direction:column;align-items:center;gap:3px;white-space:nowrap}
+.tab .ti{font-size:16px}
+.tab.on{color:var(--acc);border-bottom-color:var(--acc)}
+.tp{display:none;flex:1;overflow-y:auto;padding:16px;flex-direction:column;gap:14px}
+.tp.on{display:flex}
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px}
+.ctit{font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+/* BADGES */
+.badge{display:inline-block;font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px}
+.bd{background:rgba(255,69,96,.15);color:var(--red);border:1px solid rgba(255,69,96,.3)}
+.bw{background:rgba(255,184,48,.15);color:var(--wrn);border:1px solid rgba(255,184,48,.3)}
+.bok{background:rgba(0,214,143,.15);color:var(--grn);border:1px solid rgba(0,214,143,.3)}
+/* ROWS */
+.row{padding:11px 0;border-bottom:1px solid var(--bdr);font-size:13px}
+.row:last-child{border-bottom:none}
+.rown{font-weight:600;font-size:14px}
+.rowm{color:var(--mut);font-size:11px;margin-top:3px}
+/* REAPPRO */
+.ri{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;margin-bottom:8px;cursor:pointer;transition:border-color .2s}
+.ri:hover{border-color:var(--acc)}
+.rih{display:flex;align-items:center;gap:10px}
+.rin{font-size:15px;font-weight:700;flex:1}
+.rid{display:none;flex-direction:column;gap:10px;padding-top:6px;border-top:1px solid var(--bdr)}
+.rid.on{display:flex}
+.riloc{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--acc)}
+.rigrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rigrid label{font-size:11px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px}
+.rigrid input{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:9px 10px;outline:none;width:100%}
+.rigrid input:focus{border-color:var(--acc)}
+/* INV */
+.ii{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.iih{display:flex;align-items:center;gap:10px}
+.iiloc{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--acc);background:rgba(74,140,255,.1);padding:3px 10px;border-radius:6px}
+.iin{font-size:15px;font-weight:700;flex:1}
+.iifields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.iifields label{font-size:11px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px}
+.iifields input{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:9px 10px;outline:none;width:100%}
+.iifields input:focus{border-color:var(--grn)}
+/* STATS */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sc{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px}
+.sv2{font-size:28px;font-weight:800;line-height:1;margin-top:4px}
+.slbl{font-size:11px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.br{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr)}
+.br:last-child{border-bottom:none}
+.brl{font-size:13px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brc{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;min-width:32px;text-align:right}
+.brw{width:80px;height:6px;background:var(--bdr);border-radius:3px;overflow:hidden}
+.brf{height:100%;border-radius:3px;background:var(--acc)}
+/* FILTERS */
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:6px 12px;border-radius:20px;border:1px solid var(--bdr);color:var(--mut);cursor:pointer;transition:all .15s;background:transparent;font-family:'Inter',sans-serif}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.dr{display:flex;gap:8px;align-items:center}
+.dr input{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-family:'Inter',sans-serif;font-size:13px;padding:8px 10px;outline:none;flex:1}
+.dr input:focus{border-color:var(--acc)}
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center}
+.ov.on{display:flex}
+.modal{background:var(--surf);border:1px solid var(--bdr);border-radius:20px 20px 0 0;width:100%;max-width:520px;padding:22px 18px 32px;display:flex;flex-direction:column;gap:14px;animation:su .22s ease;max-height:85vh;overflow-y:auto}
+@keyframes su{from{transform:translateY(40px);opacity:0}}
+.mtit{font-size:17px;font-weight:700}
+.mac{display:flex;gap:10px}
+.mac .btn{flex:1}
+/* LOC PICKER */
+.lpdot{height:4px;flex:1;border-radius:2px;background:var(--bdr);transition:background .2s}
+.lpchip{display:none;padding:4px 12px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.nk{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:16px;font-size:22px;font-weight:800;cursor:pointer;text-align:center;transition:background .15s;color:var(--acc)}
+.nk:hover{background:#1e2d4a}
+/* LOC TRIGGER */
+.loctrig{background:var(--bg);border:1px solid var(--bdr);border-radius:9px;color:var(--txt);font-size:14px;padding:12px 14px;cursor:pointer;min-height:46px;display:flex;align-items:center;gap:8px;transition:border-color .2s;width:100%}
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--grn);color:#070f1a;font-size:14px;font-weight:700;padding:12px 24px;border-radius:40px;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+.empty{text-align:center;padding:24px 16px;color:var(--mut);font-size:14px}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
+</style>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+
+<!-- VEILLE -->
+<div id="sv" class="screen on" onclick="go('sr')">
+  <div class="vp">
+    <div class="vi">💊</div>
+    <div class="vt">Armoire Pharmaceutique</div>
+    <div class="vs" id="clinique-name">Clinique du Château de Florans</div>
+    <div class="vtap">TOUCHER ICI POUR PRÉLEVER UN MÉDICAMENT</div>
+  </div>
+</div>
+
+<!-- RÔLE -->
+<div id="sr" class="screen">
+  <div style="position:absolute;top:16px;left:16px"><button class="bk" onclick="go('sv')">← Retour</button></div>
+  <div class="rg">
+    <div class="rtit">Qui êtes-vous ?</div>
+    <div class="rbtn" onclick="startIDE()">
+      <div class="rbi">👩‍⚕️</div>
+      <div><div class="rbl">Je suis Infirmier(e)</div><div class="rbs">Prélever un médicament dans l'armoire</div></div>
+    </div>
+    <div class="rbtn" onclick="go('spin')">
+      <div class="rbi">⚕️</div>
+      <div><div class="rbl">Je suis Pharmacien</div><div class="rbs">Administration — accès sécurisé</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- IDE -->
+<div id="si" class="screen">
+  <div class="topbar">
+    <button id="ide-back-btn" onclick="go('sr')" style="margin:0;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);border-radius:8px;color:#fff;font-size:18px;font-weight:700;padding:6px 14px;cursor:pointer">←</button>
+    <span class="topbar-title">💊 Prélèvement</span>
+  </div>
+  <div class="idec">
+    <div id="is1">
+      <div class="fld" style="margin-bottom:14px">
+        <label>Rechercher un médicament</label>
+        <div class="sw"><span class="si2">🔍</span><input type="text" id="ide-q" placeholder="Tapez le nom ou DCI…" oninput="ideSearch()" autocomplete="off"></div>
+      </div>
+      <div id="ide-dd" class="ddl" style="display:none"></div>
+    </div>
+    <div id="is2" style="display:none">
+      <div class="qc">
+        <div><div class="qmn" id="q-name"></div><div class="qms" id="q-sub"></div><div class="qu" id="q-unit"></div></div>
+        <div>
+          <div style="font-size:12px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Quantité prélevée</div>
+          <div class="qctl">
+            <button class="qb" onclick="adjQ(-1)">−</button>
+            <input class="qi" type="number" id="ide-qty" value="1" min="1">
+            <button class="qb" onclick="adjQ(1)">+</button>
+          </div>
+        </div>
+        <button class="btn btn-g bfw" onclick="confirmQty()">✓ Valider la quantité</button>
+        <button class="btn bg bfw bs" style="margin-top:8px" onclick="ideReset()">Si vous avez sélectionné le mauvais médicament, appuyez ici pour recommencer</button>
+      </div>
+    </div>
+    <div id="is3" style="display:none">
+      <div class="ok-banner">✅ Prélèvement enregistré</div>
+      <div id="l-card" style="margin-top:14px;border-radius:14px;padding:20px;border:2px solid;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center">
+        <div id="l-loc-title" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;letter-spacing:1px">📍 Localisation dans l'armoire</div>
+        <div class="lfmt" id="l-fmt"></div>
+        <div style="font-size:13px;font-weight:600;opacity:.7;margin-top:4px" id="l-nom"></div>
+        <div style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:14px;opacity:.8">Quantité à prélever</div>
+        <div style="font-size:42px;font-weight:900;margin-top:6px;line-height:1">
+          <span id="l-qty"></span>
+        </div>
+        <span style="display:none" id="l-col"></span>
+        <span style="display:none" id="l-stock"></span>
+      </div>
+      <div id="l-label-wrap" style="margin-top:14px"></div>
+      <button class="btn bp" style="margin-top:14px" onclick="ideReset()">Prélever un autre médicament</button>
+      <button class="btn bg bfw" style="margin-top:8px" onclick="go('sv')">Terminer</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN -->
+<div id="spin" class="screen">
+  <div class="topbar"><button class="bk" onclick="go('sr')" style="margin:0">←</button><span class="topbar-title">🔐 Accès pharmacien</span></div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center">
+    <div class="pinbox">
+      <div class="pintit">Code PIN à 4 chiffres</div>
+      <div class="pindots"><div class="pd" id="pd0"></div><div class="pd" id="pd1"></div><div class="pd" id="pd2"></div><div class="pd" id="pd3"></div></div>
+      <div class="pinerr" id="pin-err"></div>
+      <div class="pingrid">
+        <div class="pk" onclick="pk('1')">1</div><div class="pk" onclick="pk('2')">2</div><div class="pk" onclick="pk('3')">3</div>
+        <div class="pk" onclick="pk('4')">4</div><div class="pk" onclick="pk('5')">5</div><div class="pk" onclick="pk('6')">6</div>
+        <div class="pk" onclick="pk('7')">7</div><div class="pk" onclick="pk('8')">8</div><div class="pk" onclick="pk('9')">9</div>
+        <div class="pk" onclick="pclr()" style="font-size:13px;color:var(--mut)">Effacer</div>
+        <div class="pk" onclick="pk('0')">0</div>
+        <div class="pk" onclick="pdel()" style="font-size:18px">⌫</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHARMACIEN -->
+<div id="sph" class="screen">
+  <div class="topbar"><span class="topbar-title">⚕️ Pharmacien</span><button class="btn bg bs" onclick="go('sv')">Quitter</button></div>
+  <div class="tabbar">
+    <button class="tab on" onclick="showTab('th')" id="btn-th"><span class="ti">📋</span>Historique</button>
+    <button class="tab" onclick="showTab('tr')" id="btn-tr"><span class="ti">📦</span>Réappro</button>
+    <button class="tab" onclick="showTab('ti')" id="btn-ti"><span class="ti">🗂️</span>Inventaire</button>
+    <button class="tab" onclick="showTab('ts')" id="btn-ts"><span class="ti">📊</span>Stats</button>
+    <button class="tab" onclick="showTab('tp2')" id="btn-tp2"><span class="ti">🗓️</span>Péremptions</button>
+    <button class="tab" onclick="showTab('tstup')" id="btn-tstup"><span class="ti">🔒</span>Stupéfiants</button>
+    <button class="tab" onclick="showTab('tc')" id="btn-tc"><span class="ti">⚙️</span>Config</button>
+  </div>
+
+  <!-- HISTORIQUE -->
+  <div class="tp on" id="th">
+    <div class="card">
+      <div class="ctit">Période</div>
+      <div class="chips" style="margin-bottom:10px">
+        <button class="chip on" onclick="setHP(7,this)">7 jours</button>
+        <button class="chip" onclick="setHP(14,this)">14 jours</button>
+        <button class="chip" onclick="setHP(30,this)">30 jours</button>
+        <button class="chip" onclick="setHP(0,this)">Tout</button>
+      </div>
+      <div class="dr">
+        <input type="date" id="hf" onchange="renderH()">
+        <span style="color:var(--mut)">→</span>
+        <input type="date" id="ht" onchange="renderH()">
+      </div>
+    </div>
+    <div class="card"><div class="ctit">Mouvements <span id="hcount" style="font-weight:400"></span></div><div id="hlist"></div></div>
+    <button class="btn bg bfw bs" onclick="emailH()">📧 Envoyer par email</button>
+  </div>
+
+  <!-- RÉAPPRO -->
+  <div class="tp" id="tr">
+    <div class="card" style="background:rgba(255,69,96,.07);border-color:rgba(255,69,96,.25)">
+      <div class="ctit" style="color:var(--red)">⚠️ Stock en dessous du seuil</div>
+      <div id="rlist"></div>
+    </div>
+    <button class="btn bg bfw bs" onclick="emailR()">📧 Envoyer rapport réappro</button>
+  </div>
+
+  <!-- INVENTAIRE -->
+  <div class="tp" id="ti">
+    <div class="fld"><label>Filtrer par étagère</label><div class="chips" id="inv-chips"></div></div>
+    <div id="ilist"></div>
+    <button class="btn btn-g bfw" onclick="saveInv()">💾 Enregistrer l'inventaire</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="tp" id="ts">
+    <div class="sgrid" id="skpi"></div>
+    <div class="card"><div class="ctit">🏆 Top médicaments (30 j)</div><div id="stop"></div></div>
+    <div class="card"><div class="ctit">📉 Stock critique</div><div id="scrit"></div></div>
+    <button class="btn bg bfw bs" onclick="emailS()">📧 Envoyer statistiques par email</button>
+  </div>
+
+  <!-- PÉREMPTIONS -->
+  <div class="tp" id="tp2">
+    <div class="card" style="background:rgba(255,69,96,.07);border-color:rgba(255,69,96,.25)">
+      <div class="ctit" style="color:var(--red)">🗓️ Péremptions dans les 3 prochains mois</div>
+      <div id="pl1"></div>
+    </div>
+    <div class="card">
+      <div class="ctit">📅 Entre 3 et 6 mois</div>
+      <div id="pl2"></div>
+    </div>
+    <button class="btn bg bfw bs" onclick="sendPeremEmail()">📧 Envoyer alerte péremptions maintenant</button>
+  </div>
+
+  <!-- STUPEFIANTS -->
+  <div class="tp" id="tstup">
+    <div class="card" style="background:rgba(255,69,96,.07);border-color:rgba(255,69,96,.4)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+        <span style="font-size:22px">🔒</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--red)">Coffre à stupéfiants — Dotation urgence</div>
+          <div style="font-size:11px;color:var(--mut);margin-top:2px">Non visible par les infirmiers — Traçabilité séparée</div>
+        </div>
+      </div>
+    </div>
+    <!-- Alertes péremptions stup -->
+    <div id="stup-alert-banner" style="display:none"></div>
+    <!-- Actions -->
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-r bs" style="flex:1" onclick="openAddStup()">+ Ajouter un stupéfiant</button>
+      <button class="btn bg bs" onclick="emailStup()">📧 Rapport</button>
+    </div>
+    <!-- Liste -->
+    <div id="stup-list"></div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="tp" id="tc">
+    <div class="card">
+      <div class="ctit">🔍 Ajouter depuis le catalogue CAHPP/OCP</div>
+      <div class="sw" style="margin-bottom:10px"><span class="si2">🔍</span><input type="text" id="cahpp-q" placeholder="Tapez le nom, DCI ou CIP…" oninput="searchCahpp()" autocomplete="off"></div>
+      <div id="cahpp-res"></div>
+    </div>
+    <div class="card">
+      <div class="ctit">💊 Médicaments dans l'armoire (<span id="med-count">0</span>)</div>
+      <div id="med-list"></div>
+    </div>
+    <div class="card">
+      <div class="ctit">📧 Configuration EmailJS (envoi automatique)</div>
+      <div style="font-size:12px;color:var(--mut);margin-bottom:12px;line-height:1.6">
+        Créez un compte gratuit sur <b>emailjs.com</b>, puis renseignez vos identifiants ci-dessous.
+      </div>
+      <div class="fld"><label>Email destinataire 1 (pharmacien)</label><input type="email" id="ejs-dest1" class="fi" placeholder="pharmacien@clinique.fr" onchange="saveEJS()"></div>
+      <div class="fld" style="margin-top:10px"><label>Email destinataire 2 (préparatrice)</label><input type="email" id="ejs-dest2" class="fi" placeholder="preparatrice@clinique.fr" onchange="saveEJS()"></div>
+      <div class="fld" style="margin-top:10px"><label>Service ID EmailJS</label><input type="text" id="ejs-sid" class="fi" placeholder="ex: service_xxxxxxx" onchange="saveEJS()"></div>
+      <div class="fld" style="margin-top:10px"><label>Template ID EmailJS</label><input type="text" id="ejs-tid" class="fi" placeholder="ex: template_xxxxxxx" onchange="saveEJS()"></div>
+      <div class="fld" style="margin-top:10px"><label>Public Key EmailJS</label><input type="text" id="ejs-key" class="fi" placeholder="ex: aBcDeFgHiJkLmNoPq" onchange="saveEJS()"></div>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn btn-g bs" style="flex:1" onclick="testEmailJS()">🧪 Tester l'envoi</button>
+        <button class="btn bg bs" style="flex:1" onclick="sendReapproEmail('manual')">📤 Envoyer maintenant</button>
+      </div>
+      <div id="ejs-status" style="font-size:12px;margin-top:8px;color:var(--mut)"></div>
+    </div>
+    <div class="card">
+      <div class="ctit">🔐 Modifier le code PIN</div>
+      <div class="fld">
+        <label>Nouveau PIN (4 chiffres)</label>
+        <input type="password" id="new-pin" maxlength="4" placeholder="••••" class="fi" style="letter-spacing:6px;font-size:18px">
+      </div>
+      <button class="btn bp" style="margin-top:10px" onclick="savePIN()">Enregistrer le PIN</button>
+    </div>
+    <div class="card">
+      <div class="ctit">🏥 Nom de la clinique</div>
+      <div class="fld"><label>Nom affiché dans l'app et les emails</label><input type="text" id="conf-clin" class="fi" placeholder="Clinique du Château de Florans" onchange="saveConf()"></div>
+    </div>
+    <div class="card">
+      <div class="ctit">👥 Infirmiers autorisés</div>
+      <div id="nurse-list"></div>
+      <button class="btn bg bs bfw" style="margin-top:10px" onclick="openModal('mn')">+ Ajouter un infirmier</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MED -->
+<div class="ov" id="mm">
+  <div class="modal">
+    <div class="mtit" id="mm-tit">Nouveau médicament</div>
+    <input type="hidden" id="f-id">
+    <div class="fld"><label>Nom commercial</label><input type="text" id="f-nom" class="fi" placeholder="ex: Doliprane"></div>
+    <div class="fld"><label>DCI</label><input type="text" id="f-dci" class="fi" placeholder="ex: Paracétamol"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fld"><label>Dosage</label><input type="text" id="f-dos" class="fi" placeholder="ex: 1000 mg"></div>
+      <div class="fld"><label>Forme</label><select id="f-frm" class="fi">
+        <option value="cp">Comprimé (cp)</option><option value="gel">Gélule</option>
+        <option value="sachet">Sachet</option><option value="ampoule">Ampoule</option>
+        <option value="flacon">Flacon</option><option value="patch">Patch</option>
+        <option value="supp">Suppositoire</option><option value="autre">Autre</option>
+      </select></div>
+    </div>
+    <div class="fld"><label>Liste</label><select id="f-liste" class="fi">
+        <option value="">Non listé</option>
+        <option value="I">Liste I</option>
+        <option value="II">Liste II</option>
+        <option value="stup">Stupéfiant</option>
+      </select></div>
+    <div class="fld">
+      <label>Alias — autres noms recherchables par les IDE</label>
+      <div class="sw" style="margin-bottom:6px">
+        <span class="si2">🔍</span>
+        <input type="text" id="alias-search" placeholder="Rechercher dans le catalogue CAHPP…" oninput="searchAlias()" autocomplete="off">
+      </div>
+      <div id="alias-dd" class="ddl" style="display:none;max-height:180px"></div>
+      <div id="alias-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+      <input type="hidden" id="f-alias" value="[]">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fld">
+        <label>Localisation</label>
+        <input type="hidden" id="f-loc">
+        <div class="loctrig" id="loc-trig" onclick="openLocPicker()">
+          <span id="loc-trig-txt" style="color:var(--mut)">Choisir l'emplacement…</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div class="fld"><label>Stock actuel</label><input type="number" id="f-stk" min="0" value="0" class="fi"></div>
+      <div class="fld"><label>Stock max</label><input type="number" id="f-max" min="1" value="20" class="fi" oninput="autoCalcCritique()"></div>
+      <div class="fld"><label>Stock critique <span style="font-size:10px;color:var(--mut)">(auto)</span></label><input type="number" id="f-seuil" min="0" value="3" class="fi"></div>
+    </div>
+    <div class="fld"><label>Date de péremption la plus proche</label><input type="date" id="f-per" class="fi"></div>
+    <div class="mac">
+      <button class="btn bg" onclick="closeModal('mm')">Annuler</button>
+      <button class="btn bp" onclick="saveMed()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL INFIRMIER -->
+<div class="ov" id="mn">
+  <div class="modal">
+    <div class="mtit">Ajouter un infirmier</div>
+    <div class="fld"><label>Identifiant (login)</label><input type="text" id="f-nl" class="fi" placeholder="ex: IDE.martin"></div>
+    <div class="fld"><label>Nom complet</label><input type="text" id="f-nn" class="fi" placeholder="ex: Martin Sophie"></div>
+    <div class="mac">
+      <button class="btn bg" onclick="closeModal('mn')">Annuler</button>
+      <button class="btn bp" onclick="saveNurse()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LOC PICKER -->
+<div class="ov" id="mloc">
+  <div class="modal" style="gap:0;padding:20px 18px 28px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <div id="lp-ico" style="font-size:24px"></div>
+      <div><div id="lp-tit" style="font-size:17px;font-weight:700"></div><div id="lp-sub" style="font-size:12px;color:var(--mut);margin-top:2px"></div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <div class="lpdot" id="lpd0"></div><div class="lpdot" id="lpd1"></div><div class="lpdot" id="lpd2"></div>
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:12px 16px;margin-bottom:16px;min-height:48px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      <span id="lse" class="lpchip" style="background:rgba(74,140,255,.15);color:var(--acc)"></span>
+      <span id="lsa1" style="display:none;color:var(--mut);font-size:16px">›</span>
+      <span id="lst" class="lpchip" style="background:rgba(0,214,143,.15);color:var(--grn)"></span>
+      <span id="lsa2" style="display:none;color:var(--mut);font-size:16px">›</span>
+      <span id="lsc" class="lpchip" style="background:rgba(255,184,48,.15);color:var(--wrn)"></span>
+      <span id="lsph" style="color:var(--mut);font-size:13px">Sélection en cours…</span>
+    </div>
+    <div class="numpad" id="lp-np"></div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:12px;margin-bottom:16px">
+      <input type="number" id="lp-man" min="1" max="20" placeholder="ou tapez le numéro" class="fi" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;text-align:center">
+      <button class="btn btn-g bs" onclick="lpManOK()" style="min-width:60px">OK</button>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn bg" style="flex:1" id="lp-back" onclick="lpBack()">← Retour</button>
+      <button class="btn bg" style="flex:1" onclick="closeModal('mloc')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL STUPEFIANT -->
+<div class="ov" id="mstup">
+  <div class="modal">
+    <div class="mtit" id="mstup-tit">Ajouter un stupéfiant</div>
+    <input type="hidden" id="fs-id">
+    <div id="fs-search-wrap">
+      <div class="fld" style="margin-bottom:8px">
+        <label>Rechercher dans le catalogue CAHPP/OCP</label>
+        <div class="sw"><span class="si2">🔍</span><input type="text" id="fs-q" placeholder="Tapez le nom ou DCI…" oninput="searchStupCahpp()" autocomplete="off"></div>
+      </div>
+      <div id="fs-dd" class="ddl" style="display:none"></div>
+    </div>
+    <div class="fld"><label>Dénomination (DCI + dosage)</label><input type="text" id="fs-nom" class="fi" placeholder="ex: Morphine sulfate 10mg/ml"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fld"><label>Forme</label><select id="fs-frm" class="fi">
+        <option value="ampoule">Ampoule</option><option value="flacon">Flacon</option>
+        <option value="cp">Comprimé</option><option value="gel">Gélule</option><option value="autre">Autre</option>
+      </select></div>
+      <div class="fld"><label>Conditionnement</label><input type="text" id="fs-cond" class="fi" placeholder="ex: 5 amp./boîte"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fld"><label>Stock actuel (unités)</label><input type="number" id="fs-stk" min="0" value="0" class="fi"></div>
+      <div class="fld"><label>Dotation autorisée</label><input type="number" id="fs-dot" min="0" value="0" class="fi"></div>
+    </div>
+    <div class="fld"><label>Date de péremption</label><input type="date" id="fs-per" class="fi"></div>
+    <div class="mac">
+      <button class="btn bg" onclick="closeModal('mstup')">Annuler</button>
+      <button class="btn btn-r" onclick="saveStup()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DB ────────────────────────────────────────────────────────────────────────
+var DB = {
+  get: function(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:JSON.parse(v); }catch(e){ return d; } },
+  set: function(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+};
+function getMeds(){ return DB.get('pa_meds',[]); }
+function setMeds(v){ DB.set('pa_meds',v); }
+function getHist(){ return DB.get('pa_hist',[]); }
+function addHist(h){ var a=getHist(); a.unshift(h); DB.set('pa_hist',a.slice(0,2000)); }
+function getConf(){ return DB.get('pa_conf',{pin:'1234',email:'',clin:'Clinique du Château de Florans'}); }
+function setConf(v){ DB.set('pa_conf',v); }
+function getNurses(){ return DB.get('pa_nurses',[{login:'IDE.demo',name:'IDE Démo'},{login:'IDE.test',name:'IDE Test'}]); }
+
+// ── SCREENS ──────────────────────────────────────────────────────────────────
+function go(id){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('on'); });
+  document.getElementById(id).classList.add('on');
+}
+
+// ── MODALS ────────────────────────────────────────────────────────────────────
+function openModal(id){ document.getElementById(id).classList.add('on'); }
+function closeModal(id){ document.getElementById(id).classList.remove('on'); }
+document.querySelectorAll('.ov').forEach(function(o){
+  o.addEventListener('click',function(e){ if(e.target===o) o.classList.remove('on'); });
+});
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+var toastTmr;
+function toast(msg,err){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=err?'var(--red)':'var(--grn)';
+  t.style.color=err?'#fff':'#070f1a';
+  t.classList.add('on');
+  clearTimeout(toastTmr);
+  toastTmr=setTimeout(function(){ t.classList.remove('on'); },2800);
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function fmtD(d){ if(!d) return '—'; try{ return new Date(d).toLocaleDateString('fr-FR'); }catch(e){ return '—'; } }
+function fmtDT(d){ if(!d) return '—'; try{ return new Date(d).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){ return '—'; } }
+
+function formeLabel(f){
+  var m={cp:'Comprimé',gel:'Gélule',sachet:'Sachet',ampoule:'Ampoule',flacon:'Flacon',patch:'Patch',supp:'Suppositoire',autre:'Unité'};
+  return m[f]||f;
+}
+function formeUnit(f){
+  var m={cp:'cp',gel:'gél.',sachet:'sachet(s)',ampoule:'ampoule(s)',flacon:'flacon(s)',patch:'patch',supp:'suppo',autre:'unité(s)'};
+  return m[f]||'unité(s)';
+}
+
+function getCaseColor(loc){
+  // Extract case number from E1-T2-C3 format
+  if(!loc) return {border:'var(--bdr)',bg:'transparent',text:'var(--txt)',label:''};
+  var m=loc.toUpperCase().match(/C(\d+)$/);
+  if(!m) return {border:'var(--bdr)',bg:'transparent',text:'var(--txt)',label:''};
+  var c=parseInt(m[1]);
+  var palette={
+    1:{border:'#cccccc',bg:'#ffffff',text:'#111111',label:'Blanche'},
+    2:{border:'#c89000',bg:'#ffd740',text:'#111111',label:'Jaune'},
+    3:{border:'#1a5fd4',bg:'#3478f6',text:'#ffffff',label:'Bleue'},
+    4:{border:'#cc0020',bg:'#ff2040',text:'#ffffff',label:'Rouge'}
+  };
+  return palette[c]||{border:'var(--bdr)',bg:'transparent',text:'var(--txt)',label:'Case '+c};
+}
+
+function formatLoc(loc){
+  if(!loc) return '—';
+  var special={
+    'A-STUPEF':'⚠️ Armoire sécurisée — Stupéfiants',
+    'CHEMO-C1':'⚠️ Armoire chimiothérapie — Case 1'
+  };
+  if(special[loc]) return special[loc];
+  var l=loc.toUpperCase();
+  var m3=l.match(/^E(\d+)-T(\d+)-C(\d+)$/);
+  if(m3) return 'Étagère '+m3[1]+'   ›   Tiroir '+m3[2]+'   ›   Case '+m3[3];
+  var m2=l.match(/^T(\d+)-C(\d+)$/);
+  if(m2) return 'Tiroir '+m2[1]+'   ›   Case '+m2[2];
+  return loc;
+}
+
+// ── PIN ──────────────────────────────────────────────────────────────────────
+var pinVal='';
+function pk(k){ if(pinVal.length>=4) return; pinVal+=k; updPinDots(); if(pinVal.length===4) setTimeout(checkPIN,150); }
+function pdel(){ if(pinVal.length>0){ pinVal=pinVal.slice(0,-1); updPinDots(); } }
+function pclr(){ pinVal=''; updPinDots(); document.getElementById('pin-err').textContent=''; }
+function updPinDots(){
+  for(var i=0;i<4;i++) document.getElementById('pd'+i).classList.toggle('on', i<pinVal.length);
+}
+function checkPIN(){
+  var conf=getConf();
+  if(pinVal===(conf.pin||'1234')){
+    pinVal=''; updPinDots(); document.getElementById('pin-err').textContent='';
+    go('sph'); renderPharma();
+  } else {
+    document.getElementById('pin-err').textContent='Code incorrect';
+    pinVal=''; updPinDots();
+  }
+}
+
+// ── IDE ──────────────────────────────────────────────────────────────────────
+var ideSelected=null;
+function startIDE(){ ideReset(); go('si'); }
+function ideReset(){
+  ideSelected=null;
+  document.getElementById('ide-q').value='';
+  document.getElementById('ide-dd').style.display='none';
+  document.getElementById('ide-dd').innerHTML='';
+  document.getElementById('is1').style.display='';
+  document.getElementById('is2').style.display='none';
+  document.getElementById('is3').style.display='none';
+  document.getElementById('ide-qty').value=1;
+  document.getElementById('ide-back-btn').style.display='';
+}
+function ideSearch(){
+  var q=document.getElementById('ide-q').value.toLowerCase().trim();
+  var dd=document.getElementById('ide-dd');
+  var meds=getMeds();
+  if(!q){ dd.style.display='none'; dd.innerHTML=''; return; }
+  var res=meds.filter(function(m){
+    return m.nom.toLowerCase().indexOf(q)>=0 || m.dci.toLowerCase().indexOf(q)>=0 || m.dosage.toLowerCase().indexOf(q)>=0;
+  });
+  if(res.length===0){ dd.style.display='block'; dd.innerHTML='<div class="ddi"><span style="color:var(--mut)">Aucun résultat</span></div>'; return; }
+  dd.style.display='block';
+  dd.innerHTML=res.slice(0,20).map(function(m){
+    return '<div class="ddi" data-mid="'+m.id+'" onclick="selectMed(this.dataset.mid)">'
+      +'<div><div class="ddn">'+m.nom+' <span style="font-weight:400;font-size:13px;color:var(--mut)">'+m.dosage+'</span></div>'
+      +'<div class="dds">'+m.dci+' — '+formeLabel(m.forme)+(m.alias&&m.alias.length?' <span style="font-size:10px;color:var(--acc)">aussi: '+m.alias.map(function(a){return a.nom;}).join(', ')+'</span>':'')+'</div></div>'
+      
+      +'</div>';
+  }).join('');
+}
+function selectMed(id){
+  var m=getMeds().find(function(x){ return x.id===id; });
+  if(!m) return;
+  ideSelected=m;
+  document.getElementById('is1').style.display='none';
+  document.getElementById('is2').style.display='';
+  document.getElementById('q-name').textContent=m.nom+' '+m.dosage;
+  document.getElementById('q-sub').textContent=m.dci+' — '+formeLabel(m.forme);
+  document.getElementById('q-unit').textContent='Unité : '+formeUnit(m.forme);
+  document.getElementById('ide-qty').value=1;
+  document.getElementById('ide-back-btn').style.display='';
+  document.getElementById('ide-qty').max=m.stock;
+}
+function adjQ(d){
+  var i=document.getElementById('ide-qty');
+  i.value=Math.max(1,Math.min(parseInt(i.value||1)+d,parseInt(i.max||999)));
+}
+function confirmQty(){
+  if(!ideSelected){ toast('Aucun médicament sélectionné',true); return; }
+  var qty=parseInt(document.getElementById('ide-qty').value)||1;
+  if(qty>ideSelected.stock){ toast('Stock insuffisant',true); return; }
+  var meds=getMeds();
+  var idx=meds.findIndex(function(x){ return x.id===ideSelected.id; });
+  meds[idx].stock-=qty;
+  setMeds(meds);
+  addHist({ts:new Date().toISOString(),medId:ideSelected.id,medNom:ideSelected.nom+' '+ideSelected.dosage,qty:qty,forme:ideSelected.forme,loc:ideSelected.localisation});
+  setTimeout(checkCriticalStock,500);
+  document.getElementById('is2').style.display='none';
+  document.getElementById('is3').style.display='';
+  document.getElementById('ide-back-btn').style.display='none';
+  document.getElementById('l-fmt').textContent=formatLoc(ideSelected.localisation);
+  document.getElementById('l-nom').textContent=ideSelected.nom+' '+ideSelected.dosage;
+  var caseLabel=getCaseColor(ideSelected.localisation).label;
+  document.getElementById('l-col').textContent=caseLabel||ideSelected.couleur||'—';
+  document.getElementById('l-qty').textContent=qty+' '+formeUnit(ideSelected.forme);
+  document.getElementById('l-stock').textContent=meds[idx].stock+' restant(s)';
+  // Apply case color
+  var cc=getCaseColor(ideSelected.localisation);
+  var card=document.getElementById('l-card');
+  card.style.borderColor=cc.border;
+  card.style.background=cc.bg;
+  document.getElementById('l-fmt').style.color=cc.text;
+  document.getElementById('l-loc-title').style.color=cc.text;
+  // Bright backgrounds need dark text (white, yellow); dark need light (blue, red)
+  var isDark=(cc.bg==='#ffffff'||cc.bg==='#ffd740');
+  document.getElementById('l-nom').parentElement.style.color=isDark?'#111111':'';
+  document.getElementById('l-col').parentElement.style.color=isDark?'#111111':'';
+  document.getElementById('l-qty').parentElement.style.color=isDark?'#111111':'';
+  document.getElementById('l-stock').parentElement.style.color=isDark?'#111111':'';
+  card.querySelectorAll('.lchip strong').forEach(function(el){ el.style.color=isDark?'#555555':''; });
+  card.querySelectorAll('div').forEach(function(el){ if(el.style.opacity==='.7') el.style.color=isDark?'#555555':''; });
+
+  // Generate label
+  renderMedLabel(ideSelected, qty, document.getElementById('l-label-wrap'));
+}
+
+// ── LOC PICKER ────────────────────────────────────────────────────────────────
+var lpState={e:null,t:null,c:null,step:0};
+var lpColors=['var(--acc)','var(--grn)','var(--wrn)'];
+var lpIcons=['🏢','🗂️','📦'];
+var lpTitles=['Quelle étagère ?','Quel tiroir ?','Quelle case ?'];
+var lpSubs=['Numéro étagère','Numéro de tiroir','Numéro de case'];
+
+function openLocPicker(){
+  lpState={e:null,t:null,c:null,step:0};
+  lpRender();
+  openModal('mloc');
+}
+function lpRender(){
+  var s=lpState.step;
+  document.getElementById('lp-ico').textContent=lpIcons[s];
+  document.getElementById('lp-tit').textContent=lpTitles[s];
+  document.getElementById('lp-sub').textContent=lpSubs[s];
+  document.getElementById('lp-man').value='';
+  document.getElementById('lp-back').style.opacity=s===0?'.4':'1';
+  document.getElementById('lp-back').disabled=s===0;
+  // dots
+  for(var i=0;i<3;i++){
+    var dot=document.getElementById('lpd'+i);
+    dot.style.background=i<=s?lpColors[s]:'var(--bdr)';
+    dot.style.opacity=i<=s?'1':'.3';
+  }
+  // chips
+  var se=document.getElementById('lse');
+  var st=document.getElementById('lst');
+  var sc=document.getElementById('lsc');
+  var sa1=document.getElementById('lsa1');
+  var sa2=document.getElementById('lsa2');
+  var sph=document.getElementById('lsph');
+  se.style.display=lpState.e!==null?'inline-block':'none';
+  se.textContent=lpState.e!==null?'Étagère '+lpState.e:'';
+  sa1.style.display=lpState.e!==null&&lpState.t!==null?'inline':'none';
+  st.style.display=lpState.t!==null?'inline-block':'none';
+  st.textContent=lpState.t!==null?'Tiroir '+lpState.t:'';
+  sa2.style.display=lpState.t!==null&&lpState.c!==null?'inline':'none';
+  sc.style.display=lpState.c!==null?'inline-block':'none';
+  sc.textContent=lpState.c!==null?'Case '+lpState.c:'';
+  sph.style.display=(lpState.e===null&&lpState.t===null&&lpState.c===null)?'':'none';
+  // numpad
+  var max=s===0?5:s===1?6:8;
+  var col=lpColors[s];
+  var html='';
+  for(var n=1;n<=max;n++){
+    html+='<div class="nk" style="color:'+col+';border-color:'+col+'33" data-n="'+n+'" onclick="lpSelect(parseInt(this.dataset.n))">'+n+'</div>';
+  }
+  html+='<div class="nk" style="color:var(--mut);font-size:14px" onclick="lpMore('+max+')">+</div>';
+  document.getElementById('lp-np').innerHTML=html;
+}
+function lpMore(cur){
+  var s=lpState.step;
+  var col=lpColors[s];
+  var html='';
+  for(var n=1;n<=20;n++){
+    html+='<div class="nk" style="color:'+col+';padding:12px;font-size:18px" data-n="'+n+'" onclick="lpSelect(parseInt(this.dataset.n))">'+n+'</div>';
+  }
+  document.getElementById('lp-np').innerHTML=html;
+}
+function lpSelect(n){
+  if(lpState.step===0) lpState.e=n;
+  else if(lpState.step===1) lpState.t=n;
+  else{ lpState.c=n; lpFinalize(); return; }
+  lpState.step++;
+  lpRender();
+}
+function lpManOK(){
+  var v=parseInt(document.getElementById('lp-man').value);
+  if(!v||v<1){ document.getElementById('lp-man').style.borderColor='var(--red)'; return; }
+  document.getElementById('lp-man').style.borderColor='var(--bdr)';
+  lpSelect(v);
+}
+function lpBack(){
+  if(lpState.step===0) return;
+  lpState.step--;
+  if(lpState.step===0){ lpState.e=null; lpState.t=null; }
+  if(lpState.step===1) lpState.t=null;
+  lpRender();
+}
+function lpFinalize(){
+  var code='E'+lpState.e+'-T'+lpState.t+'-C'+lpState.c;
+  var label='Étagère '+lpState.e+'   ›   Tiroir '+lpState.t+'   ›   Case '+lpState.c;
+  document.getElementById('f-loc').value=code;
+  var trig=document.getElementById('loc-trig-txt');
+  trig.textContent=label;
+  var ccf=getCaseColor(code);
+  trig.style.color=ccf.border;
+  trig.style.fontFamily="'JetBrains Mono',monospace";
+  trig.style.fontWeight='700';
+  document.getElementById('loc-trig').style.borderColor=ccf.border;
+  closeModal('mloc');
+}
+
+// ── PHARMACIEN ────────────────────────────────────────────────────────────────
+function renderPharma(){
+  renderH(); renderR(); renderI(); renderS(); renderP(); renderStup(); renderC();
+  var conf=getConf();
+  document.getElementById('clinique-name').textContent=conf.clin||'Clinique';
+}
+function showTab(id){
+  var tabs=['th','tr','ti','ts','tp2','tstup','tc'];
+  tabs.forEach(function(t){
+    document.getElementById(t).classList.toggle('on',t===id);
+    document.getElementById('btn-'+t).classList.toggle('on',t===id);
+  });
+  if(id==='th') renderH();
+  else if(id==='tr') renderR();
+  else if(id==='ti') renderI();
+  else if(id==='ts') renderS();
+  else if(id==='tp2') renderP();
+  else if(id==='tstup') renderStup();
+  else if(id==='tc') renderC();
+}
+
+// ── HISTORIQUE ────────────────────────────────────────────────────────────────
+var hDays=7;
+function setHP(d,el){
+  hDays=d;
+  document.querySelectorAll('#th .chip').forEach(function(c){ c.classList.remove('on'); });
+  el.classList.add('on');
+  document.getElementById('hf').value='';
+  document.getElementById('ht').value='';
+  renderH();
+}
+function renderH(){
+  var hist=getHist();
+  var now=new Date();
+  var from=document.getElementById('hf').value;
+  var to=document.getElementById('ht').value;
+  var filtered;
+  if(from||to){
+    var fd=from?new Date(from):new Date(0);
+    var td=to?new Date(to+'T23:59:59'):now;
+    filtered=hist.filter(function(h){ var d=new Date(h.ts); return d>=fd&&d<=td; });
+  } else if(hDays===0){
+    filtered=hist;
+  } else {
+    var cut=new Date(now-hDays*864e5);
+    filtered=hist.filter(function(h){ return new Date(h.ts)>=cut; });
+  }
+  document.getElementById('hcount').textContent='— '+filtered.length+' mouvement(s)';
+  var el=document.getElementById('hlist');
+  if(filtered.length===0){ el.innerHTML='<div class="empty">Aucun mouvement sur cette période</div>'; return; }
+  el.innerHTML=filtered.map(function(h){
+    return '<div class="row">'
+      +'<div class="rown">📦 '+h.qty+' '+formeUnit(h.forme||'cp')+' — '+h.medNom+'</div>'
+      +'<div class="rowm">📍 '+h.loc+' · 🕐 '+fmtDT(h.ts)+'</div>'
+      +'</div>';
+  }).join('');
+}
+function emailH(){
+  var conf=getConf();
+  var hist=getHist();
+  var body='HISTORIQUE DES PRÉLÈVEMENTS — '+fmtD(new Date().toISOString())+'\n'+(conf.clin||'')+'\n\n';
+  hist.slice(0,200).forEach(function(h){ body+=fmtDT(h.ts)+' — '+h.qty+' '+formeUnit(h.forme||'cp')+' de '+h.medNom+' ('+h.loc+')\n'; });
+  window.open('mailto:'+(conf.email||'')+'?subject='+encodeURIComponent('[PharmaArmoire] Historique '+fmtD(new Date().toISOString()))+'&body='+encodeURIComponent(body));
+  toast('📧 Email ouvert');
+}
+
+// ── RÉAPPRO ──────────────────────────────────────────────────────────────────
+function renderR(){
+  var meds=getMeds().filter(function(m){ return m.stock<=m.seuilAlerte; }).sort(function(a,b){ return a.stock-b.stock; });
+  var el=document.getElementById('rlist');
+  if(meds.length===0){ el.innerHTML='<div class="empty">✅ Aucun réapprovisionnement nécessaire</div>'; return; }
+  el.innerHTML=meds.map(function(m){
+    var bc=m.stock===0?'bd':'bw';
+    var peremVal=m.peremption||'';
+    var cmdQty=m.stockMax-m.stock;
+    var coulInfo=m.couleur?' — '+m.couleur:'';
+    return '<div class="ri" data-rid="'+m.id+'" onclick="toggleRI(this)">'
+      +'<div class="rih">'
+      +'<div><div class="rin">'+m.nom+' '+m.dosage+'</div>'
+      +'<div style="font-size:11px;color:var(--mut)">'+m.dci+' — 📍 '+formatLoc(m.localisation)+'</div></div>'
+      +'<span class="badge '+bc+'">'+m.stock+' restant(s)</span>'
+      +'</div>'
+      +'<div class="rid" id="rid-'+m.id+'">'
+      +'<div class="riloc">📍 '+formatLoc(m.localisation)+'</div>'
+      +'<div style="font-size:12px;color:var(--mut)">'+m.localisation+coulInfo+'</div>'
+      +'<div style="font-size:13px;color:var(--grn)">→ Commander : <b>'+cmdQty+'</b> unité(s) (stock max : '+m.stockMax+')</div>'
+      +'<div class="rigrid">'
+      +'<div><label>Nouveau stock</label><input type="number" id="rs-'+m.id+'" value="'+m.stock+'" min="0" onclick="event.stopPropagation()"></div>'
+      +'<div><label>Nouvelle péremption</label><input type="date" id="rp-'+m.id+'" value="'+peremVal+'" onclick="event.stopPropagation()"></div>'
+      +'</div>'
+      +'<button class="btn btn-g bs" data-rid="'+m.id+'" onclick="event.stopPropagation();saveR(this.dataset.rid)">✓ Mettre à jour le stock</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+function toggleRI(el){
+  var id='rid-'+el.dataset.rid;
+  var det=document.getElementById(id);
+  if(det) det.classList.toggle('on');
+}
+function saveR(id){
+  var meds=getMeds();
+  var idx=meds.findIndex(function(x){ return x.id===id; });
+  if(idx<0) return;
+  var ns=parseInt(document.getElementById('rs-'+id).value);
+  var np=document.getElementById('rp-'+id).value;
+  if(!isNaN(ns)) meds[idx].stock=ns;
+  if(np) meds[idx].peremption=np;
+  setMeds(meds);
+  toast('✅ Stock mis à jour');
+  renderR(); renderS();
+}
+function emailR(){
+  var meds=getMeds().filter(function(m){ return m.stock<=m.seuilAlerte; });
+  var conf=getConf();
+  var body='RAPPORT RÉAPPROVISIONNEMENT — '+fmtD(new Date().toISOString())+'\n'+(conf.clin||'')+'\n\n';
+  if(meds.length===0) body+='Aucun médicament à réapprovisionner.';
+  else meds.forEach(function(m){
+    body+='• '+m.nom+' '+m.dosage+' ('+m.dci+')\n  '+formatLoc(m.localisation)+'\n  Stock : '+m.stock+' / Seuil : '+m.seuilAlerte+' / Max : '+m.stockMax+'\n  → Commander : '+(m.stockMax-m.stock)+' unité(s)\n\n';
+  });
+  window.open('mailto:'+(conf.email||'')+'?subject='+encodeURIComponent('[PharmaArmoire] Réappro '+fmtD(new Date().toISOString()))+'&body='+encodeURIComponent(body));
+  toast('📧 Email ouvert');
+}
+
+// ── INVENTAIRE ────────────────────────────────────────────────────────────────
+var invF='all';
+function setIF(f,el){
+  invF=f;
+  document.querySelectorAll('#inv-chips .chip').forEach(function(c){ c.classList.remove('on'); });
+  el.classList.add('on');
+  renderI();
+}
+function renderI(){
+  var meds=getMeds();
+  var zones=[...new Set(meds.map(function(m){ return m.localisation.split('-')[0]; }))].sort();
+  var chips=document.getElementById('inv-chips');
+  chips.innerHTML='<button class="chip'+(invF==='all'?' on':'')+'" onclick="setIF(\'all\',this)">Toutes</button>'
+    +zones.map(function(z){
+      var lbl=z.match(/^E(\d+)$/i)?'Étagère '+z.match(/^E(\d+)$/i)[1]:z;
+      return '<button class="chip'+(invF===z?' on':'')+'" data-z="'+z+'" onclick="setIF(this.dataset.z,this)">'+lbl+'</button>';
+    }).join('');
+  var filtered=invF==='all'?meds:meds.filter(function(m){ return m.localisation.startsWith(invF); });
+  filtered=filtered.slice().sort(function(a,b){ return a.localisation.localeCompare(b.localisation); });
+  var el=document.getElementById('ilist');
+  if(filtered.length===0){ el.innerHTML='<div class="empty">Aucun médicament dans cette zone</div>'; return; }
+  el.innerHTML=filtered.map(function(m){
+    var pv=m.peremption||'';
+    return '<div class="ii">'
+      +'<div class="iih"><div class="iiloc">'+m.localisation+'</div><div class="iin">'+m.nom+' '+m.dosage+'</div></div>'
+      +'<div style="font-size:12px;color:var(--mut)">'+m.dci+' — '+formeLabel(m.forme)+'</div>'
+      +'<div style="font-size:12px;color:var(--acc);font-weight:600">📍 '+formatLoc(m.localisation)+'</div>'
+      +'<div style="font-size:12px;color:var(--mut)">Stock théorique : <b>'+m.stock+'</b> · Péremption : <b>'+fmtD(m.peremption)+'</b></div>'
+      +'<div class="iifields">'
+      +'<div><label>Quantité réelle</label><input type="number" id="iq-'+m.id+'" value="'+m.stock+'" min="0"></div>'
+      +'<div><label>Date péremption</label><input type="date" id="ip-'+m.id+'" value="'+pv+'"></div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+function saveInv(){
+  var meds=getMeds();
+  var changed=0;
+  meds.forEach(function(m){
+    var qi=document.getElementById('iq-'+m.id);
+    var pi=document.getElementById('ip-'+m.id);
+    if(qi){ var v=parseInt(qi.value); if(!isNaN(v)&&v!==m.stock){ m.stock=v; changed++; } }
+    if(pi&&pi.value&&pi.value!==m.peremption){ m.peremption=pi.value; changed++; }
+  });
+  setMeds(meds);
+  toast('✅ Inventaire enregistré ('+changed+' modif.)');
+  renderR(); renderS(); renderP();
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function renderS(){
+  var hist=getHist();
+  var meds=getMeds();
+  var now=new Date();
+  var h30=hist.filter(function(h){ return new Date(h.ts)>=(new Date(now-30*864e5)); });
+  var h7=hist.filter(function(h){ return new Date(h.ts)>=(new Date(now-7*864e5)); });
+  var total30=h30.reduce(function(s,h){ return s+h.qty; },0);
+  var crit=meds.filter(function(m){ return m.stock<=m.seuilAlerte; }).length;
+  var perim=meds.filter(function(m){ return m.peremption&&(new Date(m.peremption)-now)/864e5<=60; }).length;
+  var critCol=crit>0?'var(--red)':'var(--grn)';
+  var perimCol=perim>0?'var(--wrn)':'var(--grn)';
+  document.getElementById('skpi').innerHTML=
+    '<div class="sc"><div style="font-size:20px">📦</div><div class="sv2">'+total30+'</div><div class="slbl">Unités prélevées (30 j)</div></div>'
+    +'<div class="sc"><div style="font-size:20px">📋</div><div class="sv2">'+h7.length+'</div><div class="slbl">Mouvements (7 j)</div></div>'
+    +'<div class="sc"><div style="font-size:20px">📉</div><div class="sv2" style="color:'+critCol+'">'+crit+'</div><div class="slbl">Stock critique</div></div>'
+    +'<div class="sc"><div style="font-size:20px">🗓️</div><div class="sv2" style="color:'+perimCol+'">'+perim+'</div><div class="slbl">Périm. &lt; 60 j</div></div>';
+  var counts={};
+  h30.forEach(function(h){ counts[h.medNom]=(counts[h.medNom]||0)+h.qty; });
+  var top=Object.entries(counts).sort(function(a,b){ return b[1]-a[1]; }).slice(0,10);
+  var maxV=top[0]?top[0][1]:1;
+  var tEl=document.getElementById('stop');
+  if(top.length===0){ tEl.innerHTML='<div class="empty">Aucun mouvement sur 30 jours</div>'; }
+  else tEl.innerHTML=top.map(function(e){
+    return '<div class="br"><div class="brl">'+e[0]+'</div>'
+      +'<div class="brw"><div class="brf" style="width:'+Math.round(e[1]/maxV*100)+'%"></div></div>'
+      +'<div class="brc">'+e[1]+'</div></div>';
+  }).join('');
+  var critMeds=meds.filter(function(m){ return m.stock<=m.seuilAlerte; }).sort(function(a,b){ return a.stock-b.stock; });
+  var cEl=document.getElementById('scrit');
+  if(critMeds.length===0){ cEl.innerHTML='<div class="empty">✅ Aucun stock critique</div>'; }
+  else cEl.innerHTML=critMeds.map(function(m){
+    var bc=m.stock===0?'bd':'bw';
+    return '<div class="br"><div class="brl">'+m.nom+' '+m.dosage+'</div><span class="badge '+bc+'">'+m.stock+'</span></div>';
+  }).join('');
+}
+function emailS(){
+  var conf=getConf();
+  var hist=getHist();
+  var meds=getMeds();
+  var now=new Date();
+  var h30=hist.filter(function(h){ return new Date(h.ts)>=(new Date(now-30*864e5)); });
+  var counts={};
+  h30.forEach(function(h){ counts[h.medNom]=(counts[h.medNom]||0)+h.qty; });
+  var top=Object.entries(counts).sort(function(a,b){ return b[1]-a[1]; });
+  var body='STATISTIQUES ARMOIRE PHARMACEUTIQUE\n'+(conf.clin||'')+'\nPériode : 30 derniers jours — '+fmtD(now.toISOString())+'\n\n';
+  body+='TOTAL PRÉLEVÉ : '+h30.reduce(function(s,h){ return s+h.qty; },0)+' unités\nMOUVEMENTS : '+h30.length+'\n\nTOP MÉDICAMENTS :\n';
+  top.forEach(function(e){ body+='  • '+e[0]+' : '+e[1]+' unité(s)\n'; });
+  var critMeds=meds.filter(function(m){ return m.stock<=m.seuilAlerte; });
+  body+='\nSTOCK CRITIQUE ('+critMeds.length+') :\n';
+  critMeds.forEach(function(m){ body+='  • '+m.nom+' '+m.dosage+' : '+m.stock+' restant(s) — '+m.localisation+'\n'; });
+  window.open('mailto:'+(conf.email||'')+'?subject='+encodeURIComponent('[PharmaArmoire] Statistiques '+fmtD(now.toISOString()))+'&body='+encodeURIComponent(body));
+  toast('📧 Email ouvert');
+}
+
+// ── PÉREMPTIONS ───────────────────────────────────────────────────────────────
+function renderP(){
+  var meds=getMeds();
+  var now=new Date();
+  var lim90=new Date(now.getTime()+90*864e5);
+  var lim180=new Date(now.getTime()+180*864e5);
+  var soon=meds.filter(function(m){ if(!m.peremption) return false; var d=new Date(m.peremption); return d<=lim90; }).sort(function(a,b){ return new Date(a.peremption)-new Date(b.peremption); });
+  var mid=meds.filter(function(m){ if(!m.peremption) return false; var d=new Date(m.peremption); return d>lim90&&d<=lim180; }).sort(function(a,b){ return new Date(a.peremption)-new Date(b.peremption); });
+  function prow(m){
+    var days=Math.round((new Date(m.peremption)-now)/864e5);
+    var bc=days<=0?'bd':'bw';
+    var lbl=days<=0?'PÉRIMÉ':days+' jours';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--bdr)">'
+      +'<div style="flex:1">'
+      +'<div style="font-size:14px;font-weight:600">'+m.nom+' '+m.dosage+'</div>'
+      +'<div style="font-size:11px;color:var(--mut);margin-top:2px">📍 '+formatLoc(m.localisation)+' · Stock : '+m.stock+'</div>'
+      +'</div>'
+      +'<div style="text-align:right">'
+      +'<div style="font-size:12px;color:var(--mut)">'+fmtD(m.peremption)+'</div>'
+      +'<span class="badge '+bc+'" style="display:block;text-align:center;margin-top:3px">'+lbl+'</span>'
+      +'</div></div>';
+  }
+  document.getElementById('pl1').innerHTML=soon.length===0?'<div class="empty">✅ Aucune péremption dans les 3 prochains mois</div>':soon.map(prow).join('');
+  document.getElementById('pl2').innerHTML=mid.length===0?'<div class="empty">Aucune péremption entre 3 et 6 mois</div>':mid.map(prow).join('');
+}
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+function renderC(){
+  loadEJSFields();
+  var conf=getConf();
+  document.getElementById('conf-clin').value=conf.clin||'Clinique Château de Florans';
+  var meds=getMeds().slice().sort(function(a,b){ return a.nom.localeCompare(b.nom); });
+  document.getElementById('med-count').textContent=meds.length;
+  var ml=document.getElementById('med-list');
+  ml.innerHTML=meds.length===0?'<div class="empty">Aucun médicament</div>'
+    :meds.map(function(m){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--bdr);font-size:13px">'
+        +'<div style="flex:1"><div style="font-weight:600">'+m.nom+' '+m.dosage+'</div>'
+        +'<div style="color:var(--mut);font-size:11px">'+formatLoc(m.localisation)+' · Stock : '+m.stock+'</div></div>'
+        +'<button class="btn bg bs" data-eid="'+m.id+'" onclick="openEditMed(this.dataset.eid)">✏️</button>'
+        +'<button class="btn btn-r bs" data-did="'+m.id+'" data-dname="'+m.nom+' '+m.dosage+'" onclick="confirmDel(this.dataset.did,this.dataset.dname)">🗑</button>'
+        +'</div>';
+    }).join('');
+  var nurses=getNurses();
+  var nl=document.getElementById('nurse-list');
+  nl.innerHTML=nurses.map(function(n){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--bdr);font-size:13px">'
+      +'<div style="flex:1"><div style="font-weight:600">'+n.name+'</div><div style="color:var(--mut);font-size:11px">'+n.login+'</div></div>'
+      +'<button class="btn btn-r bs" data-log="'+n.login+'" onclick="delNurse(this.dataset.log)">🗑</button>'
+      +'</div>';
+  }).join('');
+}
+function saveConf(){
+  var c=getConf();
+  c.clin=document.getElementById('conf-clin').value;
+  setConf(c);
+  document.getElementById('clinique-name').textContent=c.clin||'Clinique du Château de Florans';
+}
+function savePIN(){
+  var np=document.getElementById('new-pin').value.trim();
+  if(!/^\d{4}$/.test(np)){ toast('PIN doit être 4 chiffres',true); return; }
+  var c=getConf(); c.pin=np; setConf(c);
+  document.getElementById('new-pin').value='';
+  toast('✅ PIN modifié');
+}
+
+// ── CAHPP SEARCH ──────────────────────────────────────────────────────────────
+function searchAlias(){
+  var q=document.getElementById('alias-search').value.toLowerCase().trim();
+  var dd=document.getElementById('alias-dd');
+  if(!q||q.length<2){ dd.style.display='none'; dd.innerHTML=''; return; }
+  var current=getAliases().map(function(a){ return a.nom.toUpperCase(); });
+  var res=CAHPP.filter(function(r){
+    return (r.nom.toLowerCase().indexOf(q)>=0||r.dci.toLowerCase().indexOf(q)>=0)
+      && current.indexOf(r.nom.toUpperCase())<0;
+  }).slice(0,10);
+  if(res.length===0){ dd.style.display='block'; dd.innerHTML='<div class="ddi"><span style="color:var(--mut)">Aucun résultat</span></div>'; return; }
+  dd.style.display='block';
+  dd.innerHTML=res.map(function(r){
+    return '<div class="ddi" data-acip="'+r.cip+'" onclick="addAlias(this.dataset.acip)">'
+      +'<div class="ddn">'+r.nom+' <span style="font-weight:400;font-size:12px;color:var(--mut)">'+r.dosage+'</span></div>'
+      +'<div class="dds">'+r.dci+' — '+r.labo+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function getAliases(){
+  var el=document.getElementById('f-alias');
+  if(!el) return [];
+  try{ return JSON.parse(el.value||'[]'); }catch(e){ return []; }
+}
+
+function addAlias(cip){
+  var r=CAHPP.find(function(x){ return x.cip===cip; });
+  if(!r) return;
+  var aliases=getAliases();
+  if(aliases.find(function(a){ return a.cip===cip; })) return;
+  aliases.push({cip:r.cip,nom:r.nom,dci:r.dci,dosage:r.dosage});
+  document.getElementById('f-alias').value=JSON.stringify(aliases);
+  renderAliasChips();
+  document.getElementById('alias-search').value='';
+  document.getElementById('alias-dd').style.display='none';
+  document.getElementById('alias-dd').innerHTML='';
+}
+
+function removeAlias(cip){
+  var aliases=getAliases().filter(function(a){ return a.cip!==cip; });
+  document.getElementById('f-alias').value=JSON.stringify(aliases);
+  renderAliasChips();
+}
+
+function renderAliasChips(){
+  var aliases=getAliases();
+  var el=document.getElementById('alias-chips');
+  if(!el) return;
+  if(aliases.length===0){
+    el.innerHTML='<span style="font-size:12px;color:var(--mut)">Aucun alias ajouté</span>';
+    return;
+  }
+  el.innerHTML=aliases.map(function(a){
+    return '<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(74,140,255,.15);border:1px solid rgba(74,140,255,.3);border-radius:20px;padding:4px 10px 4px 12px;font-size:12px;font-weight:600;color:var(--acc)">'
+      +a.nom+' '+a.dosage
+      +'<span data-acip="'+a.cip+'" onclick="removeAlias(this.dataset.acip)" style="cursor:pointer;font-size:16px;color:var(--mut);line-height:1">×</span>'
+      +'</div>';
+  }).join('');
+}
+
+function resetAliases(){
+  var el=document.getElementById('f-alias');
+  if(el) el.value='[]';
+  var s=document.getElementById('alias-search');
+  if(s) s.value='';
+  var dd=document.getElementById('alias-dd');
+  if(dd){ dd.style.display='none'; dd.innerHTML=''; }
+  renderAliasChips();
+}
+
+function getListeFromDCI(dci){
+  if(!dci) return '';
+  var d=dci.toLowerCase();
+  // Stupéfiants
+  var stup=['morphine','fentanyl','oxycodone','hydromorphone','buprénorphine','buprenorphine',
+    'sufentanil','rémifentanil','remifentanil','alfentanil','méthadone','methadone',
+    'midazolam','kétamine','ketamine','thiopental','flunitrazépam','flunitrazepam'];
+  for(var i=0;i<stup.length;i++){ if(d.indexOf(stup[i])>=0) return 'stup'; }
+  // Liste I
+  var l1=['tramadol','codéine','codeine','tramadol','lorazépam','lorazepam','diazépam','diazepam',
+    'clonazépam','clonazepam','bromazépam','bromazepam','prazépam','prazepam','oxazépam','oxazepam',
+    'alprazolam','zolpidem','zopiclone','triazolam','lormétazépam','lormetazepam','nordazépam',
+    'amoxicilline','augmentin','ciprofloxacine','lévofloxacine','levofloxacine','doxycycline',
+    'métronidazole','metronidazole','ceftriaxone','cefotaxime','céfpodoxime','cefpodoxime',
+    'vancomycine','amikacine','gentamicine','pipéracilline','piperacilline','imipénem','meropenem',
+    'aciclovir','fluconazole','voriconazole',
+    'esoméprazole','esomeprazole','oméprazole','omeprazole','pantoprazole','lansoprazole',
+    'furosémide','furosemide','spironolactone','hydrochlorothiazide',
+    'bisoprolol','métoprolol','metoprolol','aténolol','atenolol','carvédilol','carvedilol',
+    'amlodipine','nifédipine','nifedipine','vérapamil','diltiazem',
+    'ramipril','périndopril','perindopril','lisinopril','énalapril','enalapril',
+    'valsartan','candésartan','candesartan','irbésartan','irbesartan','olmésartan',
+    'rivaroxaban','apixaban','dabigatran','fluindione','acénocoumarol','acenocoumarol',
+    'clopidogrel','ticagrélor','ticagrelor','prasugrel',
+    'atorvastatine','atorvastatine','rosuvastatine','rosuvastatine','simvastatine',
+    'lévothyroxine','levothyroxine',
+    'metformine','glibenclamide','gliclazide','sitagliptine','empagliflozine','dapagliflozine',
+    'insuline','sémaglutide','semaglutide','liraglutide',
+    'sertraline','escitalopram','citalopram','fluoxétine','fluoxetine','venlafaxine','mirtazapine',
+    'rispéridone','risperidone','olanzapine','halopéridol','haloperidol','cyamémazine',
+    'lévétiracétam','levetiracetam','lamotrigine','valproate','phénytoïne','carbamazépine',
+    'donépézil','rivastigmine','mémantine','memantine',
+    'prednisolone','prednisone','méthylprednisolone','methylprednisolone','dexaméthasone','dexamethasone',
+    'hydroxyzine','métopimazine','ondansétron','ondansetron',
+    'amiodarone','digoxine','sotalol','flécaïnide','flecanide',
+    'enoxaparine','daltéparine','dalteparine','tinzaparine','héparine','heparine',
+    'salbutamol','ciclésonide','ciclesonide','fluticasone','tiotropium','indacatérol',
+    'acétylcystéine','acetylcysteine','naloxone','néfopam','nefopam','propofol',
+    'atropine','adrénaline','adrenaline','noradrénaline','noradrenaline','dobutamine',
+    'nicardipine','potassium','calcium','magnésium','magnesium'];
+  for(var j=0;j<l1.length;j++){ if(d.indexOf(l1[j])>=0) return 'I'; }
+  // Liste II
+  var l2=['ibuprofène','ibuprofene','naproxène','naproxene','diclofénac','diclofenac',
+    'kétoprofène','ketoprofene','acide acétylsalicylique','cétirizine','cetirizine',
+    'lévocetirizine','levocetirizine','loratadine','desloratadine','phloroglucinol',
+    'trimébutine','trimebutine','métoclopramide','metoclopramide'];
+  for(var k=0;k<l2.length;k++){ if(d.indexOf(l2[k])>=0) return 'II'; }
+  return '';
+}
+
+function searchCahpp(){
+  var q=document.getElementById('cahpp-q').value.toLowerCase().trim();
+  var el=document.getElementById('cahpp-res');
+  if(!q||q.length<2){ el.innerHTML=''; return; }
+  var meds=getMeds();
+  var inArm=new Set(meds.map(function(m){ return m.nom.toUpperCase(); }));
+  var res=CAHPP.filter(function(r){
+    return r.nom.toLowerCase().indexOf(q)>=0||r.dci.toLowerCase().indexOf(q)>=0||r.cip.indexOf(q)>=0||r.labo.toLowerCase().indexOf(q)>=0;
+  }).slice(0,15);
+  if(res.length===0){ el.innerHTML='<div class="empty" style="padding:10px">Aucun résultat dans le catalogue</div>'; return; }
+  el.innerHTML=res.map(function(r){
+    var already=inArm.has(r.nom.toUpperCase());
+    var action=already
+      ?'<span class="badge bok">Déjà dans l\'armoire</span>'
+      :'<button class="btn btn-g bs" data-cip="'+r.cip+'" onclick="addFromCahpp(this.dataset.cip)">+ Ajouter</button>';
+    var style=already?'opacity:.5;cursor:default':'';
+    return '<div class="ddi" style="'+style+'">'
+      +'<div>'
+      +'<div class="ddn">'+r.nom+' <span style="font-weight:400;font-size:12px;color:var(--mut)">'+r.dosage+'</span></div>'
+      +'<div class="dds">'+r.dci+' — '+formeLabel(r.forme)+' — '+r.labo+' — CIP : '+r.cip+'</div>'
+      +'</div>'+action+'</div>';
+  }).join('');
+}
+function addFromCahpp(cip){
+  var r=CAHPP.find(function(x){ return x.cip===cip; });
+  if(!r) return;
+  resetMedForm();
+  document.getElementById('mm-tit').textContent='Ajouter depuis catalogue';
+  document.getElementById('f-nom').value=r.nom;
+  document.getElementById('f-dci').value=r.dci;
+  document.getElementById('f-dos').value=r.dosage;
+  document.getElementById('f-frm').value=r.forme;
+  document.getElementById('f-liste').value=getListeFromDCI(r.dci);
+  openModal('mm');
+}
+
+// ── MED CRUD ─────────────────────────────────────────────────────────────────
+function resetMedForm(){
+  document.getElementById('f-id').value='';
+  document.getElementById('f-nom').value='';
+  document.getElementById('f-dci').value='';
+  document.getElementById('f-dos').value='';
+  document.getElementById('f-liste').value='';
+  document.getElementById('f-stk').value=0;
+  document.getElementById('f-max').value=20;
+  document.getElementById('f-seuil').value=10;
+  document.getElementById('f-per').value='';
+  document.getElementById('f-loc').value='';
+  var trig=document.getElementById('loc-trig-txt');
+  trig.textContent="Choisir l'emplacement…";
+  trig.style.color='var(--mut)';
+  trig.style.fontFamily='inherit';
+  trig.style.fontWeight='400';
+  document.getElementById('loc-trig').style.borderColor='var(--bdr)';
+}
+function openAddMed(){
+  resetMedForm();
+  document.getElementById('mm-tit').textContent='Nouveau médicament';
+  openModal('mm');
+}
+function openEditMed(id){
+  var m=getMeds().find(function(x){ return x.id===id; });
+  if(!m) return;
+  resetMedForm();
+  document.getElementById('mm-tit').textContent='Modifier '+m.nom;
+  document.getElementById('f-id').value=id;
+  document.getElementById('f-nom').value=m.nom;
+  document.getElementById('f-dci').value=m.dci;
+  document.getElementById('f-dos').value=m.dosage;
+  document.getElementById('f-frm').value=m.forme;
+  document.getElementById('f-liste').value=m.liste||'';
+  document.getElementById('f-stk').value=m.stock;
+  document.getElementById('f-seuil').value=m.seuilAlerte;
+  document.getElementById('f-max').value=m.stockMax;
+  document.getElementById('f-per').value=m.peremption||'';
+  document.getElementById('f-loc').value=m.localisation;
+  var trig=document.getElementById('loc-trig-txt');
+  trig.textContent=formatLoc(m.localisation);
+  var cc2=getCaseColor(m.localisation);
+  trig.style.color=cc2.border;
+  trig.style.fontFamily="'JetBrains Mono',monospace";
+  trig.style.fontWeight='700';
+  document.getElementById('loc-trig').style.borderColor=cc2.border;
+  document.getElementById('loc-trig').style.background=cc2.bg==='#ffffff'?'rgba(255,255,255,0.1)':cc2.bg==='#ffd740'?'rgba(255,215,64,0.15)':cc2.bg==='#3478f6'?'rgba(52,120,246,0.15)':cc2.bg==='#ff2040'?'rgba(255,32,64,0.15)':'transparent';
+  openModal('mm');
+}
+function saveMed(){
+  var nom=document.getElementById('f-nom').value.trim();
+  var loc=document.getElementById('f-loc').value.trim();
+  if(!nom||!loc){ toast('Nom et localisation requis',true); return; }
+  var meds=getMeds();
+  var eid=document.getElementById('f-id').value;
+  var med={
+    id:eid||'m'+Date.now(),
+    nom:nom, dci:document.getElementById('f-dci').value.trim(),
+    dosage:document.getElementById('f-dos').value.trim(),
+    forme:document.getElementById('f-frm').value,
+    liste:document.getElementById('f-liste').value||'',
+    localisation:loc.toUpperCase(),
+    stock:parseInt(document.getElementById('f-stk').value)||0,
+    seuilAlerte:parseInt(document.getElementById('f-seuil').value)||3,
+    stockMax:parseInt(document.getElementById('f-max').value)||20,
+    peremption:document.getElementById('f-per').value||null
+  };
+  if(eid){ var idx=meds.findIndex(function(x){ return x.id===eid; }); meds[idx]=med; toast('✅ Modifié'); }
+  else{ meds.push(med); toast('✅ Ajouté'); }
+  setMeds(meds); closeModal('mm'); renderC(); renderR(); renderS(); renderP(); renderI();
+}
+function confirmDel(id,name){
+  if(!confirm('Supprimer "'+name+'" ?')) return;
+  setMeds(getMeds().filter(function(x){ return x.id!==id; }));
+  renderC(); renderR(); renderS(); renderP(); renderI();
+  toast('Supprimé');
+}
+
+// ── NURSES ────────────────────────────────────────────────────────────────────
+function saveNurse(){
+  var login=document.getElementById('f-nl').value.trim();
+  var name=document.getElementById('f-nn').value.trim();
+  if(!login||!name){ toast('Champs requis',true); return; }
+  var nurses=getNurses();
+  if(nurses.find(function(n){ return n.login===login; })){ toast('Identifiant existant',true); return; }
+  nurses.push({login:login,name:name});
+  DB.set('pa_nurses',nurses);
+  closeModal('mn'); renderC(); toast('✅ Infirmier ajouté');
+}
+function delNurse(login){
+  if(!confirm('Supprimer cet infirmier ?')) return;
+  DB.set('pa_nurses',getNurses().filter(function(n){ return n.login!==login; }));
+  renderC(); toast('🗑 Supprimé');
+}
+
+// ── CATALOGUE CAHPP/OCP ───────────────────────────────────────────────────────
+var CAHPP=[
+  {cip:'3400935475523',nom:'DOLIPRANE 1000MG',dci:'Paracétamol',dosage:'1000 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400935475516',nom:'DOLIPRANE 500MG',dci:'Paracétamol',dosage:'500 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400937354463',nom:'DOLIPRANE 100MG/ML',dci:'Paracétamol',dosage:'100 mg/ml',forme:'flacon',labo:'SANOFI'},
+  {cip:'3400921971205',nom:'DAFALGAN 1G',dci:'Paracétamol',dosage:'1 g',forme:'cp',labo:'UPSA'},
+  {cip:'3400921971199',nom:'DAFALGAN 500MG',dci:'Paracétamol',dosage:'500 mg',forme:'cp',labo:'UPSA'},
+  {cip:'3400936081054',nom:'EFFERALGAN 1G',dci:'Paracétamol',dosage:'1 g',forme:'cp',labo:'UPSA'},
+  {cip:'3400935673127',nom:'IBUPROFENE MYLAN 400MG',dci:'Ibuprofène',dosage:'400 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400935673110',nom:'IBUPROFENE MYLAN 200MG',dci:'Ibuprofène',dosage:'200 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400921548116',nom:'ADVIL 400MG',dci:'Ibuprofène',dosage:'400 mg',forme:'cp',labo:'PFIZER'},
+  {cip:'3400936241831',nom:'AUGMENTIN 1G',dci:'Amoxicilline/Ac. clavulanique',dosage:'1 g',forme:'cp',labo:'GSK'},
+  {cip:'3400934009059',nom:'AUGMENTIN 500MG',dci:'Amoxicilline/Ac. clavulanique',dosage:'500 mg',forme:'cp',labo:'GSK'},
+  {cip:'3400935878745',nom:'AMOXICILLINE MYLAN 500MG',dci:'Amoxicilline',dosage:'500 mg',forme:'gel',labo:'MYLAN'},
+  {cip:'3400935878752',nom:'AMOXICILLINE MYLAN 1G',dci:'Amoxicilline',dosage:'1 g',forme:'cp',labo:'MYLAN'},
+  {cip:'3400934969672',nom:'CLAMOXYL 1G',dci:'Amoxicilline',dosage:'1 g',forme:'cp',labo:'GSK'},
+  {cip:'3400935187869',nom:'ORELOX 100MG',dci:'Céfpodoxime',dosage:'100 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400936081993',nom:'CIPROFLOXACINE MYLAN 500MG',dci:'Ciprofloxacine',dosage:'500 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400935673226',nom:'DOXYCYCLINE MYLAN 100MG',dci:'Doxycycline',dosage:'100 mg',forme:'gel',labo:'MYLAN'},
+  {cip:'3400936448680',nom:'METRONIDAZOLE MYLAN 500MG',dci:'Métronidazole',dosage:'500 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400921971489',nom:'FLAGYL 500MG',dci:'Métronidazole',dosage:'500 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400935673318',nom:'ZOVIRAX 200MG',dci:'Aciclovir',dosage:'200 mg',forme:'cp',labo:'GSK'},
+  {cip:'3400936081924',nom:'DIFLUCAN 150MG',dci:'Fluconazole',dosage:'150 mg',forme:'gel',labo:'PFIZER'},
+  {cip:'3400935187913',nom:'METFORMINE EG 500MG',dci:'Metformine',dosage:'500 mg',forme:'cp',labo:'EG'},
+  {cip:'3400935187920',nom:'METFORMINE EG 850MG',dci:'Metformine',dosage:'850 mg',forme:'cp',labo:'EG'},
+  {cip:'3400934009141',nom:'GLUCOPHAGE 500MG',dci:'Metformine',dosage:'500 mg',forme:'cp',labo:'MERCK'},
+  {cip:'3400935473697',nom:'INEXIUM 40MG',dci:'Esoméprazole',dosage:'40 mg',forme:'gel',labo:'ASTRAZENECA'},
+  {cip:'3400935473680',nom:'INEXIUM 20MG',dci:'Esoméprazole',dosage:'20 mg',forme:'gel',labo:'ASTRAZENECA'},
+  {cip:'3400936082014',nom:'PANTOPRAZOLE MYLAN 40MG',dci:'Pantoprazole',dosage:'40 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400934969832',nom:'MOPRAL 20MG',dci:'Oméprazole',dosage:'20 mg',forme:'gel',labo:'ASTRAZENECA'},
+  {cip:'3400935187951',nom:'OMEPRAZOLE MYLAN 20MG',dci:'Oméprazole',dosage:'20 mg',forme:'gel',labo:'MYLAN'},
+  {cip:'3400936082076',nom:'LASILIX 40MG',dci:'Furosémide',dosage:'40 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400935673479',nom:'FUROSEMIDE MYLAN 40MG',dci:'Furosémide',dosage:'40 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400934009196',nom:'BISOPROLOL EG 5MG',dci:'Bisoprolol',dosage:'5 mg',forme:'cp',labo:'EG'},
+  {cip:'3400934009202',nom:'BISOPROLOL EG 10MG',dci:'Bisoprolol',dosage:'10 mg',forme:'cp',labo:'EG'},
+  {cip:'3400935473843',nom:'CONCOR 5MG',dci:'Bisoprolol',dosage:'5 mg',forme:'cp',labo:'MERCK'},
+  {cip:'3400936082137',nom:'AMLODIPINE TEVA 5MG',dci:'Amlodipine',dosage:'5 mg',forme:'cp',labo:'TEVA'},
+  {cip:'3400936082151',nom:'XARELTO 20MG',dci:'Rivaroxaban',dosage:'20 mg',forme:'cp',labo:'BAYER'},
+  {cip:'3400936082168',nom:'XARELTO 15MG',dci:'Rivaroxaban',dosage:'15 mg',forme:'cp',labo:'BAYER'},
+  {cip:'3400935473891',nom:'KARDEGIC 75MG',dci:'Acide acétylsalicylique',dosage:'75 mg',forme:'sachet',labo:'SANOFI'},
+  {cip:'3400935473908',nom:'KARDEGIC 160MG',dci:'Acide acétylsalicylique',dosage:'160 mg',forme:'sachet',labo:'SANOFI'},
+  {cip:'3400934009264',nom:'ASPEGIC 100MG',dci:'Acide acétylsalicylique',dosage:'100 mg',forme:'sachet',labo:'SANOFI'},
+  {cip:'3400935473940',nom:'LOVENOX 4000UI',dci:'Enoxaparine sodique',dosage:'4000 UI',forme:'ampoule',labo:'SANOFI'},
+  {cip:'3400935473957',nom:'LOVENOX 6000UI',dci:'Enoxaparine sodique',dosage:'6000 UI',forme:'ampoule',labo:'SANOFI'},
+  {cip:'3400936082243',nom:'ELIQUIS 5MG',dci:'Apixaban',dosage:'5 mg',forme:'cp',labo:'BMS-PFIZER'},
+  {cip:'3400936082250',nom:'ELIQUIS 2.5MG',dci:'Apixaban',dosage:'2,5 mg',forme:'cp',labo:'BMS-PFIZER'},
+  {cip:'3400935673677',nom:'TRAMADOL ARROW 50MG',dci:'Tramadol',dosage:'50 mg',forme:'gel',labo:'ARROW'},
+  {cip:'3400935673691',nom:'IXPRIM',dci:'Tramadol/Paracétamol',dosage:'37,5/325 mg',forme:'cp',labo:'GRUNENTHAL'},
+  {cip:'3400934009357',nom:'MORPHINE SULFATE 10MG/5ML',dci:'Morphine sulfate',dosage:'10 mg/5 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400934009358',nom:'MORPHINE SULFATE 20MG/10ML',dci:'Morphine sulfate',dosage:'20 mg/10 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400934009359',nom:'MORPHINE SULFATE 50MG/5ML',dci:'Morphine sulfate',dosage:'50 mg/5 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400934009360',nom:'MORPHINE SULFATE 100MG/10ML',dci:'Morphine sulfate',dosage:'100 mg/10 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400934009361',nom:'MORPHINE CHLORHYDRATE 10MG/1ML',dci:'Morphine chlorhydrate',dosage:'10 mg/1 ml',forme:'ampoule',labo:'COOPER'},
+  {cip:'3400934009362',nom:'MORPHINE CHLORHYDRATE 20MG/1ML',dci:'Morphine chlorhydrate',dosage:'20 mg/1 ml',forme:'ampoule',labo:'COOPER'},
+  {cip:'3400935473940',nom:'MORPHINE LP 10MG',dci:'Morphine sulfate LP',dosage:'10 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400935473941',nom:'MORPHINE LP 30MG',dci:'Morphine sulfate LP',dosage:'30 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400935473942',nom:'MORPHINE LP 60MG',dci:'Morphine sulfate LP',dosage:'60 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400935473943',nom:'MORPHINE LP 100MG',dci:'Morphine sulfate LP',dosage:'100 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400935473944',nom:'MORPHINE LP 200MG',dci:'Morphine sulfate LP',dosage:'200 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400935473945',nom:'SEVREDOL 10MG',dci:'Morphine sulfate',dosage:'10 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400935473946',nom:'SEVREDOL 20MG',dci:'Morphine sulfate',dosage:'20 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400935473947',nom:'ORAMORPH 2MG/ML',dci:'Morphine sulfate',dosage:'2 mg/ml',forme:'flacon',labo:'BOEHRINGER'},
+  {cip:'3400935473948',nom:'ORAMORPH 20MG/ML',dci:'Morphine sulfate',dosage:'20 mg/ml',forme:'flacon',labo:'BOEHRINGER'},
+  {cip:'3400934009371',nom:'OXYCONTIN LP 5MG',dci:'Oxycodone LP',dosage:'5 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400934009372',nom:'OXYCONTIN LP 10MG',dci:'Oxycodone LP',dosage:'10 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400934009373',nom:'OXYCONTIN LP 20MG',dci:'Oxycodone LP',dosage:'20 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400934009374',nom:'OXYCONTIN LP 40MG',dci:'Oxycodone LP',dosage:'40 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400934009375',nom:'OXYCONTIN LP 80MG',dci:'Oxycodone LP',dosage:'80 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400934009376',nom:'OXYNORM 5MG',dci:'Oxycodone',dosage:'5 mg',forme:'gel',labo:'MUNDIPHARMA'},
+  {cip:'3400934009377',nom:'OXYNORM 10MG',dci:'Oxycodone',dosage:'10 mg',forme:'gel',labo:'MUNDIPHARMA'},
+  {cip:'3400934009378',nom:'OXYNORM 20MG',dci:'Oxycodone',dosage:'20 mg',forme:'gel',labo:'MUNDIPHARMA'},
+  {cip:'3400934009379',nom:'OXYCODONE MYLAN 10MG/ML',dci:'Oxycodone',dosage:'10 mg/ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400934009380',nom:'OXYCODONE MYLAN 50MG/5ML',dci:'Oxycodone',dosage:'50 mg/5 ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475350',nom:'MIDAZOLAM AGUETTANT 1MG/ML',dci:'Midazolam',dosage:'1 mg/ml - 5 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475351',nom:'MIDAZOLAM AGUETTANT 5MG/5ML',dci:'Midazolam',dosage:'5 mg/5 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475352',nom:'MIDAZOLAM AGUETTANT 10MG/2ML',dci:'Midazolam',dosage:'10 mg/2 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475353',nom:'MIDAZOLAM AGUETTANT 50MG/10ML',dci:'Midazolam',dosage:'50 mg/10 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475354',nom:'MIDAZOLAM MYLAN 5MG/5ML',dci:'Midazolam',dosage:'5 mg/5 ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475355',nom:'MIDAZOLAM MYLAN 50MG/10ML',dci:'Midazolam',dosage:'50 mg/10 ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475381',nom:'FENTANYL JANSSEN 50MCG/ML',dci:'Fentanyl',dosage:'50 µg/ml - 2 ml',forme:'ampoule',labo:'JANSSEN'},
+  {cip:'3400935475382',nom:'FENTANYL JANSSEN 50MCG/ML 10ML',dci:'Fentanyl',dosage:'50 µg/ml - 10 ml',forme:'ampoule',labo:'JANSSEN'},
+  {cip:'3400935475383',nom:'FENTANYL MYLAN 50MCG/ML',dci:'Fentanyl',dosage:'50 µg/ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475384',nom:'DUROGESIC 12MCG/H',dci:'Fentanyl',dosage:'12 µg/h',forme:'patch',labo:'JANSSEN'},
+  {cip:'3400935475385',nom:'DUROGESIC 25MCG/H',dci:'Fentanyl',dosage:'25 µg/h',forme:'patch',labo:'JANSSEN'},
+  {cip:'3400935475386',nom:'DUROGESIC 50MCG/H',dci:'Fentanyl',dosage:'50 µg/h',forme:'patch',labo:'JANSSEN'},
+  {cip:'3400935475387',nom:'DUROGESIC 75MCG/H',dci:'Fentanyl',dosage:'75 µg/h',forme:'patch',labo:'JANSSEN'},
+  {cip:'3400935475388',nom:'DUROGESIC 100MCG/H',dci:'Fentanyl',dosage:'100 µg/h',forme:'patch',labo:'JANSSEN'},
+  {cip:'3400935475389',nom:'ACTIQ 200MCG',dci:'Fentanyl citrate',dosage:'200 µg',forme:'autre',labo:'TEVA'},
+  {cip:'3400935475390',nom:'ACTIQ 400MCG',dci:'Fentanyl citrate',dosage:'400 µg',forme:'autre',labo:'TEVA'},
+  {cip:'3400935475391',nom:'ACTIQ 800MCG',dci:'Fentanyl citrate',dosage:'800 µg',forme:'autre',labo:'TEVA'},
+  {cip:'3400935475392',nom:'INSTANYL 50MCG',dci:'Fentanyl',dosage:'50 µg/dose',forme:'flacon',labo:'TAKEDA'},
+  {cip:'3400935475393',nom:'INSTANYL 100MCG',dci:'Fentanyl',dosage:'100 µg/dose',forme:'flacon',labo:'TAKEDA'},
+  {cip:'3400935475394',nom:'ABSTRAL 100MCG',dci:'Fentanyl',dosage:'100 µg',forme:'cp',labo:'KYOWA KIRIN'},
+  {cip:'3400935475395',nom:'ABSTRAL 200MCG',dci:'Fentanyl',dosage:'200 µg',forme:'cp',labo:'KYOWA KIRIN'},
+  {cip:'3400935475396',nom:'SUFENTANIL MYLAN 5MCG/ML',dci:'Sufentanil',dosage:'5 µg/ml - 2 ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475397',nom:'SUFENTANIL MYLAN 5MCG/ML 10ML',dci:'Sufentanil',dosage:'5 µg/ml - 10 ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475398',nom:'SUFENTANIL AGUETTANT 5MCG/ML',dci:'Sufentanil',dosage:'5 µg/ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475399',nom:'SUFENTANIL AGUETTANT 50MCG/ML',dci:'Sufentanil',dosage:'50 µg/ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475400',nom:'REMIFENTANIL MYLAN 1MG',dci:'Rémifentanil',dosage:'1 mg',forme:'flacon',labo:'MYLAN'},
+  {cip:'3400935475401',nom:'REMIFENTANIL MYLAN 2MG',dci:'Rémifentanil',dosage:'2 mg',forme:'flacon',labo:'MYLAN'},
+  {cip:'3400935475402',nom:'REMIFENTANIL MYLAN 5MG',dci:'Rémifentanil',dosage:'5 mg',forme:'flacon',labo:'MYLAN'},
+  {cip:'3400935475403',nom:'ALFENTANIL MYLAN 0.5MG/ML',dci:'Alfentanil',dosage:'0,5 mg/ml - 2 ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475404',nom:'ALFENTANIL MYLAN 0.5MG/ML 10ML',dci:'Alfentanil',dosage:'0,5 mg/ml - 10 ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475012',nom:'TEMESTA 1MG',dci:'Lorazépam',dosage:'1 mg',forme:'cp',labo:'PFIZER'},
+  {cip:'3400935475013',nom:'TEMESTA 2.5MG',dci:'Lorazépam',dosage:'2,5 mg',forme:'cp',labo:'PFIZER'},
+  {cip:'3400935475014',nom:'LORAZEPAM MYLAN 1MG/ML',dci:'Lorazépam',dosage:'1 mg/ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475015',nom:'LORAZEPAM MYLAN 2MG/ML',dci:'Lorazépam',dosage:'2 mg/ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475043',nom:'IMOVANE 7.5MG',dci:'Zopiclone',dosage:'7,5 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400934010351',nom:'STILNOX 10MG',dci:'Zolpidem',dosage:'10 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400935475044',nom:'ZOLPIDEM MYLAN 10MG',dci:'Zolpidem',dosage:'10 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400935475187',nom:'LEXOMIL 6MG',dci:'Bromazépam',dosage:'6 mg',forme:'cp',labo:'ROCHE'},
+  {cip:'3400935475188',nom:'BROMAZEPAM MYLAN 6MG',dci:'Bromazépam',dosage:'6 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400935475189',nom:'RIVOTRIL 0.5MG',dci:'Clonazépam',dosage:'0,5 mg',forme:'cp',labo:'ROCHE'},
+  {cip:'3400935475190',nom:'RIVOTRIL 2MG',dci:'Clonazépam',dosage:'2 mg',forme:'cp',labo:'ROCHE'},
+  {cip:'3400935475191',nom:'RIVOTRIL 1MG/ML GOUTTES',dci:'Clonazépam',dosage:'1 mg/ml',forme:'flacon',labo:'ROCHE'},
+  {cip:'3400935475192',nom:'CLONAZEPAM AGUETTANT 1MG/ML',dci:'Clonazépam',dosage:'1 mg/ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475193',nom:'VALIUM 10MG',dci:'Diazépam',dosage:'10 mg',forme:'cp',labo:'ROCHE'},
+  {cip:'3400935475194',nom:'DIAZEPAM AGUETTANT 10MG/2ML',dci:'Diazépam',dosage:'10 mg/2 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475195',nom:'DIAZEPAM MYLAN 10MG/2ML',dci:'Diazépam',dosage:'10 mg/2 ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475196',nom:'URBANYL 10MG',dci:'Clobazam',dosage:'10 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400935475197',nom:'URBANYL 20MG',dci:'Clobazam',dosage:'20 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400935475198',nom:'LYSANXIA 10MG',dci:'Prazépam',dosage:'10 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400935475199',nom:'NORDAZ 7.5MG',dci:'Nordazépam',dosage:'7,5 mg',forme:'cp',labo:'ROCHE'},
+  {cip:'3400935475200',nom:'ROHYPNOL 1MG',dci:'Flunitrazépam',dosage:'1 mg',forme:'cp',labo:'ROCHE'},
+  {cip:'3400935475201',nom:'NOCTAMIDE 2MG',dci:'Lormétazépam',dosage:'2 mg',forme:'cp',labo:'BAYER'},
+  {cip:'3400935475202',nom:'HALCION 0.125MG',dci:'Triazolam',dosage:'0,125 mg',forme:'cp',labo:'PFIZER'},
+  {cip:'3400935475319',nom:'KETAMINE AGUETTANT 250MG/5ML',dci:'Kétamine',dosage:'250 mg/5 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475320',nom:'KETAMINE AGUETTANT 500MG/10ML',dci:'Kétamine',dosage:'500 mg/10 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475321',nom:'KETAMINE PANPHARMA 250MG/5ML',dci:'Kétamine',dosage:'250 mg/5 ml',forme:'ampoule',labo:'PANPHARMA'},
+  {cip:'3400935475322',nom:'KETAMINE PANPHARMA 500MG/10ML',dci:'Kétamine',dosage:'500 mg/10 ml',forme:'ampoule',labo:'PANPHARMA'},
+  {cip:'3400935475323',nom:'KETALAR 500MG/10ML',dci:'Kétamine',dosage:'500 mg/10 ml',forme:'flacon',labo:'PFIZER'},
+  {cip:'3400935475440',nom:'PENTOTHAL 0.5G',dci:'Thiopental sodique',dosage:'0,5 g',forme:'flacon',labo:'ARCHIMEDES'},
+  {cip:'3400935475441',nom:'PENTOTHAL 1G',dci:'Thiopental sodique',dosage:'1 g',forme:'flacon',labo:'ARCHIMEDES'},
+  {cip:'3400935475442',nom:'NARCAN 0.4MG/ML',dci:'Naloxone',dosage:'0,4 mg/ml',forme:'ampoule',labo:'INDIVIOR'},
+  {cip:'3400935475443',nom:'NALOXONE AGUETTANT 0.4MG/ML',dci:'Naloxone',dosage:'0,4 mg/ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475444',nom:'NALOXONE MYLAN 0.4MG/ML',dci:'Naloxone',dosage:'0,4 mg/ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475445',nom:'SUBUTEX 0.4MG',dci:'Buprénorphine',dosage:'0,4 mg',forme:'cp',labo:'INDIVIOR'},
+  {cip:'3400935475446',nom:'SUBUTEX 2MG',dci:'Buprénorphine',dosage:'2 mg',forme:'cp',labo:'INDIVIOR'},
+  {cip:'3400935475447',nom:'SUBUTEX 8MG',dci:'Buprénorphine',dosage:'8 mg',forme:'cp',labo:'INDIVIOR'},
+  {cip:'3400935475448',nom:'BUPRENORPHINE ARROW 2MG',dci:'Buprénorphine',dosage:'2 mg',forme:'cp',labo:'ARROW'},
+  {cip:'3400935475449',nom:'BUPRENORPHINE ARROW 8MG',dci:'Buprénorphine',dosage:'8 mg',forme:'cp',labo:'ARROW'},
+  {cip:'3400935475450',nom:'TEMGESIC 0.2MG/ML',dci:'Buprénorphine',dosage:'0,2 mg/ml',forme:'ampoule',labo:'INDIVIOR'},
+  {cip:'3400935475451',nom:'SOPHIDONE LP 4MG',dci:'Hydromorphone LP',dosage:'4 mg',forme:'gel',labo:'MUNDIPHARMA'},
+  {cip:'3400935475452',nom:'SOPHIDONE LP 8MG',dci:'Hydromorphone LP',dosage:'8 mg',forme:'gel',labo:'MUNDIPHARMA'},
+  {cip:'3400935475453',nom:'SOPHIDONE LP 16MG',dci:'Hydromorphone LP',dosage:'16 mg',forme:'gel',labo:'MUNDIPHARMA'},
+  {cip:'3400935475454',nom:'HYDROMORPHONE AGUETTANT 2MG/ML',dci:'Hydromorphone',dosage:'2 mg/ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475455',nom:'HYDROMORPHONE AGUETTANT 10MG/ML',dci:'Hydromorphone',dosage:'10 mg/ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475456',nom:'METHADONE AP-HP 1MG/ML',dci:'Méthadone',dosage:'1 mg/ml',forme:'flacon',labo:'AP-HP'},
+  {cip:'3400935475457',nom:'METHADONE AP-HP 10MG/ML',dci:'Méthadone',dosage:'10 mg/ml',forme:'flacon',labo:'AP-HP'},
+  {cip:'3400935475458',nom:'METHADONE GELULE 1MG',dci:'Méthadone',dosage:'1 mg',forme:'gel',labo:'BOUCHARA-RECORDATI'},
+  {cip:'3400935475459',nom:'METHADONE GELULE 5MG',dci:'Méthadone',dosage:'5 mg',forme:'gel',labo:'BOUCHARA-RECORDATI'},
+  {cip:'3400935475460',nom:'METHADONE GELULE 10MG',dci:'Méthadone',dosage:'10 mg',forme:'gel',labo:'BOUCHARA-RECORDATI'},
+  {cip:'3400935475461',nom:'METHADONE GELULE 40MG',dci:'Méthadone',dosage:'40 mg',forme:'gel',labo:'BOUCHARA-RECORDATI'},
+  {cip:'3400935475462',nom:'SKENAN LP 10MG',dci:'Morphine sulfate LP',dosage:'10 mg',forme:'gel',labo:'MUNDIPHARMA'},
+  {cip:'3400935475463',nom:'SKENAN LP 30MG',dci:'Morphine sulfate LP',dosage:'30 mg',forme:'gel',labo:'MUNDIPHARMA'},
+  {cip:'3400935475464',nom:'SKENAN LP 60MG',dci:'Morphine sulfate LP',dosage:'60 mg',forme:'gel',labo:'MUNDIPHARMA'},
+  {cip:'3400935475465',nom:'SKENAN LP 100MG',dci:'Morphine sulfate LP',dosage:'100 mg',forme:'gel',labo:'MUNDIPHARMA'},
+  {cip:'3400935475466',nom:'SKENAN LP 200MG',dci:'Morphine sulfate LP',dosage:'200 mg',forme:'gel',labo:'MUNDIPHARMA'},
+  {cip:'3400935475467',nom:'MOSCONTIN LP 10MG',dci:'Morphine sulfate LP',dosage:'10 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400935475468',nom:'MOSCONTIN LP 30MG',dci:'Morphine sulfate LP',dosage:'30 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400935475469',nom:'MOSCONTIN LP 60MG',dci:'Morphine sulfate LP',dosage:'60 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400935475470',nom:'MOSCONTIN LP 100MG',dci:'Morphine sulfate LP',dosage:'100 mg',forme:'cp',labo:'MUNDIPHARMA'},
+  {cip:'3400935187975',nom:'LEXOMIL 6MG',dci:'Bromazépam',dosage:'6 mg',forme:'cp',labo:'ROCHE'},
+  {cip:'3400935187982',nom:'LYSANXIA 10MG',dci:'Prazépam',dosage:'10 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400935187999',nom:'ATARAX 25MG',dci:'Hydroxyzine',dosage:'25 mg',forme:'cp',labo:'UCB PHARMA'},
+  {cip:'3400935474025',nom:'SERESTA 50MG',dci:'Oxazépam',dosage:'50 mg',forme:'cp',labo:'PFIZER'},
+  {cip:'3400936082366',nom:'SOLUPRED 20MG',dci:'Prednisolone',dosage:'20 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400936082373',nom:'SOLUPRED 5MG',dci:'Prednisolone',dosage:'5 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400935474087',nom:'MEDROL 4MG',dci:'Méthylprednisolone',dosage:'4 mg',forme:'cp',labo:'PFIZER'},
+  {cip:'3400936082427',nom:'SPASFON 80MG',dci:'Phloroglucinol',dosage:'80 mg',forme:'cp',labo:'TEVA'},
+  {cip:'3400935474131',nom:'VOGALENE 10MG',dci:'Métopimazine',dosage:'10 mg',forme:'cp',labo:'IPSEN'},
+  {cip:'3400935474186',nom:'VENTOLINE 100MCG',dci:'Salbutamol',dosage:'100 µg',forme:'flacon',labo:'GSK'},
+  {cip:'3400935474193',nom:'ALVESCO 160MCG',dci:'Ciclésonide',dosage:'160 µg',forme:'flacon',labo:'TAKEDA'},
+  {cip:'3400934009555',nom:'FLIXOTIDE 250MCG',dci:'Fluticasone',dosage:'250 µg',forme:'flacon',labo:'GSK'},
+  {cip:'3400936082596',nom:'XYZALL 5MG',dci:'Lévocetirizine',dosage:'5 mg',forme:'cp',labo:'UCB PHARMA'},
+  {cip:'3400934009593',nom:'ZYRTEC 10MG',dci:'Cétirizine',dosage:'10 mg',forme:'cp',labo:'UCB PHARMA'},
+  {cip:'3400935474247',nom:'CETIRIZINE MYLAN 10MG',dci:'Cétirizine',dosage:'10 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400936082657',nom:'NACL 0.9% 250ML',dci:'Chlorure de sodium',dosage:'0,9% 250 ml',forme:'flacon',labo:'BAXTER'},
+  {cip:'3400936082664',nom:'NACL 0.9% 500ML',dci:'Chlorure de sodium',dosage:'0,9% 500 ml',forme:'flacon',labo:'BAXTER'},
+  {cip:'3400934009647',nom:'GLUCOSE 5% 250ML',dci:'Glucose',dosage:'5% 250 ml',forme:'flacon',labo:'BAXTER'},
+  {cip:'3400934009654',nom:'GLUCOSE 5% 500ML',dci:'Glucose',dosage:'5% 500 ml',forme:'flacon',labo:'BAXTER'},
+  {cip:'3400935474292',nom:'RINGER LACTATE 500ML',dci:'Lactate de Ringer',dosage:'500 ml',forme:'flacon',labo:'BAXTER'},
+  {cip:'3400936082718',nom:'METHOTREXATE MEDAC 2.5MG',dci:'Méthotrexate',dosage:'2,5 mg',forme:'cp',labo:'MEDAC'},
+  {cip:'3400935474339',nom:'LEVOTHYROX 50MCG',dci:'Lévothyroxine',dosage:'50 µg',forme:'cp',labo:'MERCK'},
+  {cip:'3400935474346',nom:'LEVOTHYROX 75MCG',dci:'Lévothyroxine',dosage:'75 µg',forme:'cp',labo:'MERCK'},
+  {cip:'3400935474353',nom:'LEVOTHYROX 100MCG',dci:'Lévothyroxine',dosage:'100 µg',forme:'cp',labo:'MERCK'},
+  {cip:'3400935474360',nom:'ATORVASTATINE MYLAN 10MG',dci:'Atorvastatine',dosage:'10 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400935474377',nom:'ATORVASTATINE MYLAN 20MG',dci:'Atorvastatine',dosage:'20 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400934009753',nom:'TAHOR 10MG',dci:'Atorvastatine',dosage:'10 mg',forme:'cp',labo:'PFIZER'},
+  {cip:'3400936082886',nom:'CRESTOR 5MG',dci:'Rosuvastatine',dosage:'5 mg',forme:'cp',labo:'ASTRAZENECA'},
+  {cip:'3400935474421',nom:'LISINOPRIL MYLAN 5MG',dci:'Lisinopril',dosage:'5 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400936082947',nom:'RAMIPRIL MYLAN 5MG',dci:'Ramipril',dosage:'5 mg',forme:'gel',labo:'MYLAN'},
+  {cip:'3400935474476',nom:'PERINDOPRIL MYLAN 5MG',dci:'Périndopril',dosage:'5 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400936083003',nom:'COVERSYL 5MG',dci:'Périndopril',dosage:'5 mg',forme:'cp',labo:'SERVIER'},
+  {cip:'3400935474483',nom:'VALSARTAN MYLAN 80MG',dci:'Valsartan',dosage:'80 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400935474520',nom:'CANDESARTAN MYLAN 8MG',dci:'Candésartan',dosage:'8 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400935474551',nom:'INSULINE NOVORAPID 100U/ML',dci:'Insuline asparte',dosage:'100 U/ml',forme:'flacon',labo:'NOVO NORDISK'},
+  {cip:'3400935474568',nom:'LANTUS 100U/ML',dci:'Insuline glargine',dosage:'100 U/ml',forme:'flacon',labo:'SANOFI'},
+  {cip:'3400936083228',nom:'JARDIANCE 10MG',dci:'Empagliflozine',dosage:'10 mg',forme:'cp',labo:'BOEHRINGER'},
+  {cip:'3400935474605',nom:'FORXIGA 10MG',dci:'Dapagliflozine',dosage:'10 mg',forme:'cp',labo:'ASTRAZENECA'},
+  {cip:'3400936083390',nom:'HYDROCORTISONE 10MG',dci:'Hydrocortisone',dosage:'10 mg',forme:'cp',labo:'PFIZER'},
+  {cip:'3400935474728',nom:'DEPAKINE 500MG LP',dci:'Valproate de sodium',dosage:'500 mg LP',forme:'cp',labo:'SANOFI'},
+  {cip:'3400934010085',nom:'LAMICTAL 100MG',dci:'Lamotrigine',dosage:'100 mg',forme:'cp',labo:'GSK'},
+  {cip:'3400935474735',nom:'LEVETIRACETAM MYLAN 500MG',dci:'Lévétiracétam',dosage:'500 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400934010123',nom:'ARICEPT 10MG',dci:'Donépézil',dosage:'10 mg',forme:'cp',labo:'EISAI'},
+  {cip:'3400935474797',nom:'CITALOPRAM MYLAN 20MG',dci:'Citalopram',dosage:'20 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400935474803',nom:'ESCITALOPRAM MYLAN 10MG',dci:'Escitalopram',dosage:'10 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400934010199',nom:'ZOLOFT 50MG',dci:'Sertraline',dosage:'50 mg',forme:'gel',labo:'PFIZER'},
+  {cip:'3400935474865',nom:'VENLAFAXINE MYLAN 75MG LP',dci:'Venlafaxine LP',dosage:'75 mg',forme:'gel',labo:'MYLAN'},
+  {cip:'3400934010237',nom:'EFFEXOR LP 75MG',dci:'Venlafaxine LP',dosage:'75 mg',forme:'gel',labo:'PFIZER'},
+  {cip:'3400936083552',nom:'RISPERDAL 2MG',dci:'Rispéridone',dosage:'2 mg',forme:'cp',labo:'JANSSEN'},
+  {cip:'3400934010275',nom:'ZYPREXA 10MG',dci:'Olanzapine',dosage:'10 mg',forme:'cp',labo:'LILLY'},
+  {cip:'3400936083606',nom:'TERCIAN 25MG',dci:'Cyamémazine',dosage:'25 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400935474988',nom:'HALDOL 5MG',dci:'Halopéridol',dosage:'5 mg',forme:'cp',labo:'JANSSEN'},
+  {cip:'3400935475012',nom:'TEMESTA 1MG',dci:'Lorazépam',dosage:'1 mg',forme:'cp',labo:'PFIZER'},
+  {cip:'3400935475043',nom:'IMOVANE 7.5MG',dci:'Zopiclone',dosage:'7,5 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400934010351',nom:'STILNOX 10MG',dci:'Zolpidem',dosage:'10 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400936083714',nom:'CLOPIDOGREL MYLAN 75MG',dci:'Clopidogrel',dosage:'75 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400935475104',nom:'PLAVIX 75MG',dci:'Clopidogrel',dosage:'75 mg',forme:'cp',labo:'SANOFI-BMS'},
+  {cip:'3400934010399',nom:'BRILIQUE 90MG',dci:'Ticagrélor',dosage:'90 mg',forme:'cp',labo:'ASTRAZENECA'},
+  {cip:'3400936083768',nom:'AMIODARONE MYLAN 200MG',dci:'Amiodarone',dosage:'200 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400935475166',nom:'CORDARONE 200MG',dci:'Amiodarone',dosage:'200 mg',forme:'cp',labo:'SANOFI'},
+  {cip:'3400935475197',nom:'ADALATE 10MG',dci:'Nifédipine LP',dosage:'10 mg',forme:'cp',labo:'BAYER'},
+  {cip:'3400934010475',nom:'HEPARINE CHOAY 25000UI',dci:'Héparine sodique',dosage:'25000 UI/5 ml',forme:'ampoule',labo:'SANOFI'},
+  {cip:'3400935475258',nom:'FRAGMINE 5000UI',dci:'Daltéparine sodique',dosage:'5000 UI',forme:'ampoule',labo:'PFIZER'},
+  {cip:'3400934010513',nom:'ACUPAN 20MG',dci:'Néfopam',dosage:'20 mg',forme:'ampoule',labo:'BIOCODEX'},
+  {cip:'3400935475319',nom:'KETAMINE 50MG/10ML',dci:'Kétamine',dosage:'50 mg/10 ml',forme:'ampoule',labo:'PANPHARMA'},
+  {cip:'3400936083930',nom:'PROPOFOL 10MG/ML',dci:'Propofol',dosage:'10 mg/ml',forme:'flacon',labo:'FRESENIUS'},
+  {cip:'3400935475350',nom:'MIDAZOLAM 5MG/5ML',dci:'Midazolam',dosage:'5 mg/5 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400934010551',nom:'ATROPINE 1MG/ML',dci:'Atropine sulfate',dosage:'1 mg/ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475381',nom:'ADRENALINE 1MG/ML',dci:'Adrénaline',dosage:'1 mg/ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400936083984',nom:'NORADRENALINE 8MG/4ML',dci:'Noradrénaline',dosage:'8 mg/4 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400934010599',nom:'POTASSIUM CHLORURE 10MEQ',dci:'Potassium chlorure',dosage:'10 mEq/10 ml',forme:'ampoule',labo:'FRESENIUS'},
+  {cip:'3400935475442',nom:'CALCIUM GLUCONATE 10%',dci:'Gluconate de calcium',dosage:'10% 10 ml',forme:'ampoule',labo:'AGUETTANT'},
+  {cip:'3400935475472',nom:'FLUIMUCIL IV 5G/25ML',dci:'Acétylcystéine',dosage:'5 g/25 ml',forme:'ampoule',labo:'ZAMBON'},
+  {cip:'3400934010637',nom:'NACETYLCYSTEINE 2G/10ML',dci:'Acétylcystéine',dosage:'2 g/10 ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400936084072',nom:'ONDANSETRON 4MG/2ML',dci:'Ondansétron',dosage:'4 mg/2 ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475503',nom:'ZOPHREN 4MG',dci:'Ondansétron',dosage:'4 mg',forme:'cp',labo:'GSK'},
+  {cip:'3400935475564',nom:'PARACETAMOL IV 10MG/ML 100ML',dci:'Paracétamol',dosage:'10 mg/ml 100 ml',forme:'flacon',labo:'FRESENIUS'},
+  {cip:'3400934010713',nom:'PARACETAMOL IV 50ML',dci:'Paracétamol',dosage:'10 mg/ml 50 ml',forme:'flacon',labo:'AGUETTANT'},
+  {cip:'3400935475594',nom:'AMIKACINE 500MG/2ML',dci:'Amikacine',dosage:'500 mg/2 ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400936084180',nom:'GENTAMICINE 80MG/2ML',dci:'Gentamicine',dosage:'80 mg/2 ml',forme:'ampoule',labo:'MYLAN'},
+  {cip:'3400935475624',nom:'VANCOMYCINE 500MG',dci:'Vancomycine',dosage:'500 mg',forme:'flacon',labo:'MYLAN'},
+  {cip:'3400934010751',nom:'TAZOCILLINE 4G',dci:'Pipéracilline/Tazobactam',dosage:'4 g/0,5 g',forme:'flacon',labo:'PFIZER'},
+  {cip:'3400935475654',nom:'IMIPENEM 500MG',dci:'Imipenem/Cilastatine',dosage:'500 mg',forme:'flacon',labo:'MYLAN'},
+  {cip:'3400936084234',nom:'MEROPENEM 1G',dci:'Méropénème',dosage:'1 g',forme:'flacon',labo:'MYLAN'},
+  {cip:'3400935475684',nom:'CLAFORAN 1G',dci:'Céfotaxime',dosage:'1 g',forme:'flacon',labo:'SANOFI'},
+  {cip:'3400934010799',nom:'ROCEPHINE 1G',dci:'Ceftriaxone',dosage:'1 g',forme:'flacon',labo:'ROCHE'},
+  {cip:'3400935475714',nom:'CEFTRIAXONE MYLAN 1G',dci:'Ceftriaxone',dosage:'1 g',forme:'flacon',labo:'MYLAN'},
+  {cip:'3400936084288',nom:'FORTUM 1G',dci:'Ceftazidime',dosage:'1 g',forme:'flacon',labo:'GSK'},
+  {cip:'3400935475744',nom:'LEVOFLOXACINE MYLAN 500MG',dci:'Lévofloxacine',dosage:'500 mg',forme:'cp',labo:'MYLAN'},
+  {cip:'3400934010837',nom:'TAVANIC 500MG',dci:'Lévofloxacine',dosage:'500 mg',forme:'cp',labo:'SANOFI'}
+];
+
+// ── STUPÉFIANTS ──────────────────────────────────────────────────────────────
+function getStups(){ return DB.get('pa_stups',[]); }
+function setStups(v){ DB.set('pa_stups',v); }
+
+function renderStup(){
+  var stups=getStups();
+  var now=new Date();
+  var lim90=new Date(now.getTime()+90*864e5);
+
+  // Alert banner
+  var alerts=stups.filter(function(s){ return s.peremption&&new Date(s.peremption)<=lim90; });
+  var banner=document.getElementById('stup-alert-banner');
+  if(alerts.length>0){
+    banner.style.display='';
+    banner.innerHTML='<div style="background:rgba(255,69,96,.12);border:1px solid rgba(255,69,96,.4);border-radius:10px;padding:12px 14px;font-size:13px;font-weight:600;color:var(--red)">⚠️ '+alerts.length+' stupéfiant(s) périmant dans les 90 prochains jours</div>';
+  } else {
+    banner.style.display='none';
+  }
+
+  var el=document.getElementById('stup-list');
+  if(stups.length===0){
+    el.innerHTML='<div class="empty" style="padding:30px">Aucun stupéfiant enregistré dans le coffre</div>';
+    return;
+  }
+  el.innerHTML=stups.map(function(s){
+    var days=s.peremption?Math.round((new Date(s.peremption)-now)/864e5):null;
+    var perimCls=days===null?'':''; 
+    var perimBadge='';
+    if(days!==null){
+      if(days<=0) perimBadge='<span class="badge bd">PÉRIMÉ</span>';
+      else if(days<=30) perimBadge='<span class="badge bd">'+days+' j</span>';
+      else if(days<=90) perimBadge='<span class="badge bw">'+days+' j</span>';
+      else perimBadge='<span class="badge bok">'+days+' j</span>';
+    }
+    var stockColor=s.stock<=0?'var(--red)':s.stock<s.dotation?'var(--wrn)':'var(--grn)';
+    return '<div style="background:var(--surf);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:8px">'
+      +'<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">'
+      +'<div style="font-size:20px">💊</div>'
+      +'<div style="flex:1">'
+      +'<div style="font-size:15px;font-weight:700;color:var(--red)">'+s.nom+'</div>'
+      +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+formeLabel(s.forme)+(s.cond?' — '+s.cond:'')+(s.loc?' — 📍 '+s.loc:'')+'</div>'
+      +'</div>'
+      +perimBadge
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+      +'<div style="background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:10px;text-align:center">'
+      +'<div style="font-size:11px;color:var(--mut);font-weight:600;text-transform:uppercase">Stock</div>'
+      +'<div style="font-size:22px;font-weight:800;color:'+stockColor+'">'+s.stock+'</div>'
+      +'<div style="font-size:10px;color:var(--mut)">dotation : '+s.dotation+'</div>'
+      +'</div>'
+      +'<div style="background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:10px;text-align:center">'
+      +'<div style="font-size:11px;color:var(--mut);font-weight:600;text-transform:uppercase">Péremption</div>'
+      +'<div style="font-size:14px;font-weight:700;margin-top:6px">'+fmtD(s.peremption)+'</div>'
+      +'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:8px">'
+      +'<button class="btn bg bs" style="flex:1" data-sid="'+s.id+'" onclick="openEditStup(this.dataset.sid)">✏️ Modifier</button>'
+      +'<button class="btn btn-r bs" data-sid="'+s.id+'" data-snom="'+s.nom+'" onclick="confirmDelStup(this.dataset.sid,this.dataset.snom)">🗑</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function searchStupCahpp(){
+  var q=document.getElementById('fs-q').value.toLowerCase().trim();
+  var dd=document.getElementById('fs-dd');
+  if(!q||q.length<2){ dd.style.display='none'; dd.innerHTML=''; return; }
+  var res=CAHPP.filter(function(r){
+    return r.nom.toLowerCase().indexOf(q)>=0||r.dci.toLowerCase().indexOf(q)>=0||r.cip.indexOf(q)>=0;
+  }).slice(0,12);
+  if(res.length===0){ dd.style.display='block'; dd.innerHTML='<div class="ddi"><span style="color:var(--mut)">Aucun résultat</span></div>'; return; }
+  dd.style.display='block';
+  dd.innerHTML=res.map(function(r){
+    return '<div class="ddi" data-scip="'+r.cip+'" onclick="selectStupCahpp(this.dataset.scip)">'
+      +'<div><div class="ddn">'+r.nom+' <span style="font-weight:400;font-size:12px;color:var(--mut)">'+r.dosage+'</span></div>'
+      +'<div class="dds">'+r.dci+' — '+formeLabel(r.forme)+' — '+r.labo+'</div></div>'
+      +'</div>';
+  }).join('');
+}
+
+function selectStupCahpp(cip){
+  var r=CAHPP.find(function(x){ return x.cip===cip; });
+  if(!r) return;
+  document.getElementById('fs-nom').value=r.nom+' '+r.dosage;
+  document.getElementById('fs-frm').value=r.forme;
+  document.getElementById('fs-q').value='';
+  document.getElementById('fs-dd').style.display='none';
+  document.getElementById('fs-dd').innerHTML='';
+  toast('Sélectionné : '+r.nom);
+}
+
+function resetStupForm(){
+  document.getElementById('fs-id').value='';
+  document.getElementById('fs-nom').value='';
+  document.getElementById('fs-cond').value='';
+  document.getElementById('fs-stk').value=0;
+  document.getElementById('fs-dot').value=0;
+  document.getElementById('fs-per').value='';
+  document.getElementById('fs-q').value='';
+  document.getElementById('fs-dd').style.display='none';
+  document.getElementById('fs-dd').innerHTML='';
+  document.getElementById('fs-search-wrap').style.display='';
+}
+
+function openAddStup(){
+  document.getElementById('mstup-tit').textContent='Ajouter un stupéfiant';
+  resetStupForm();
+  openModal('mstup');
+}
+function openEditStup(id){
+  var s=getStups().find(function(x){ return x.id===id; });
+  if(!s) return;
+  resetStupForm();
+  document.getElementById('mstup-tit').textContent='Modifier '+s.nom;
+  document.getElementById('fs-id').value=id;
+  document.getElementById('fs-nom').value=s.nom;
+  document.getElementById('fs-frm').value=s.forme;
+  document.getElementById('fs-cond').value=s.cond||'';
+  document.getElementById('fs-stk').value=s.stock;
+  document.getElementById('fs-dot').value=s.dotation;
+  document.getElementById('fs-per').value=s.peremption||'';
+  document.getElementById('fs-search-wrap').style.display='none';
+  openModal('mstup');
+}
+function saveStup(){
+  var nom=document.getElementById('fs-nom').value.trim();
+  if(!nom){ toast('Dénomination requise',true); return; }
+  var stups=getStups();
+  var eid=document.getElementById('fs-id').value;
+  var s={
+    id:eid||'stup'+Date.now(),
+    nom:nom,
+    forme:document.getElementById('fs-frm').value,
+    cond:document.getElementById('fs-cond').value.trim(),
+    stock:parseInt(document.getElementById('fs-stk').value)||0,
+    dotation:parseInt(document.getElementById('fs-dot').value)||0,
+    lot:document.getElementById('fs-lot').value.trim(),
+    peremption:document.getElementById('fs-per').value||null,
+    loc:document.getElementById('fs-loc').value.trim(),
+    remarques:document.getElementById('fs-rem').value.trim()
+  };
+  if(eid){ var idx=stups.findIndex(function(x){ return x.id===eid; }); stups[idx]=s; toast('✅ Modifié'); }
+  else{ stups.push(s); toast('✅ Stupéfiant ajouté'); }
+  setStups(stups); closeModal('mstup'); renderStup();
+}
+
+function confirmDelStup(id,nom){
+  if(!confirm('Supprimer "'+nom+'" du coffre ?\nCette action est irréversible.')) return;
+  setStups(getStups().filter(function(x){ return x.id!==id; }));
+  renderStup(); toast('Supprimé');
+}
+
+function emailStup(){
+  var stups=getStups();
+  var conf=getConf();
+  var now=new Date();
+  var nl='\n';
+  var body='COFFRE AUX STUPEFIANTS - DOTATION URGENCE'+nl+(conf.clin||'')+nl+'Genere le : '+fmtD(now.toISOString())+nl+nl;
+  if(stups.length===0){ body+='Aucun stupefiant enregistre.'; }
+  else{
+    body+='INVENTAIRE DU COFFRE ('+stups.length+' produit(s)) :'+nl+nl;
+    stups.forEach(function(s){
+      var days=s.peremption?Math.round((new Date(s.peremption)-now)/864e5):null;
+      var perimInfo=s.peremption?fmtD(s.peremption)+(days!==null?' (J'+(days>=0?'+':'')+days+')':''):'Non renseignee';
+      var alertFlag=days!==null&&days<=90?' ALERTE PEREMPTION':'';
+      body+='- '+s.nom+nl;
+      body+='  Forme : '+formeLabel(s.forme)+(s.cond?' - '+s.cond:'')+nl;
+      body+='  Stock : '+s.stock+' / Dotation autorisee : '+s.dotation+nl;
+      body+='  N lot : '+(s.lot||'-')+nl;
+      body+='  Peremption : '+perimInfo+alertFlag+nl;
+      if(s.loc) body+='  Emplacement : '+s.loc+nl;
+      if(s.remarques) body+='  Remarques : '+s.remarques+nl;
+      body+=nl;
+    });
+    var alerts=stups.filter(function(s){ return s.peremption&&(new Date(s.peremption)-now)/864e5<=90; });
+    if(alerts.length>0){
+      body+='ALERTES PEREMPTIONS ('+alerts.length+' produit(s)) :'+nl;
+      alerts.forEach(function(s){
+        var days=Math.round((new Date(s.peremption)-now)/864e5);
+        body+='  - '+s.nom+' - '+fmtD(s.peremption)+(days<=0?' PERIME':' dans '+days+' jours')+nl;
+      });
+    }
+  }
+  window.open('mailto:'+(conf.email||'')+'?subject='+encodeURIComponent('[PharmaArmoire] Coffre stupéfiants '+fmtD(now.toISOString()))+'&body='+encodeURIComponent(body));
+  toast('📧 Email ouvert');
+}
+
+// ── ÉTIQUETTE MÉDICAMENT ─────────────────────────────────────────────────────
+function renderMedLabel(med, qty, container){
+  var cc=getCaseColor(med.localisation);
+  var listeText='';
+  var listeColor='';
+  var liste=med.liste||getListeFromDCI(med.dci||'');
+  if(liste==='stup'){ listeText='Stupéfiant — Ordonnance sécurisée obligatoire'; listeColor='#cc0000'; }
+  else if(liste==='I'){ listeText='Liste I — Respecter les doses prescrites'; listeColor='#cc0000'; }
+  else if(liste==='II'){ listeText='Liste II — Respecter les doses prescrites'; listeColor='#007a00'; }
+
+  var clinique=getConf().clin||'Clinique du Château de Florans';
+  var html='<div style="background:#fff;border:3px solid '+cc.border+';border-radius:0;padding:16px 14px;text-align:center;font-family:Arial,sans-serif;max-width:280px;margin:0 auto">'
+    +'<div style="font-size:10px;color:#333;margin-bottom:8px;line-height:1.4">'+clinique+'</div>'
+    +'<div style="font-size:22px;font-weight:900;color:#111;line-height:1.1">'+med.nom+'</div>'
+    +'<div style="font-size:16px;color:#444;margin-top:2px">'+med.dci+'</div>'
+    +'<div style="font-size:20px;font-weight:700;color:#111;margin-top:6px">'+med.dosage+'</div>'
+    +'<div style="font-size:15px;color:#555;margin-top:2px">'+formeLabel(med.forme)+'</div>'
+
+    +(listeText?'<div style="background:'+listeColor+';color:#fff;font-size:11px;font-weight:700;padding:4px 8px;border-radius:4px;margin-top:10px">'+listeText+'</div>':'')
+    +'</div>';
+  container.innerHTML=html;
+}
+
+// ── DEMO DATA ─────────────────────────────────────────────────────────────────
+function loadDemo(){
+  if(getMeds().length>0) return;
+  setMeds([
+    {id:'m1',nom:'Doliprane',dci:'Paracétamol',dosage:'1000 mg',forme:'cp',categorie:'Analgésique',localisation:'E1-T1-C1',couleur:'Blanc',stock:8,seuilAlerte:5,stockMax:30,peremption:'2026-12-15'},
+    {id:'m2',nom:'Ibuprofène Mylan',dci:'Ibuprofène',dosage:'400 mg',forme:'cp',categorie:'Analgésique',localisation:'E1-T1-C2',couleur:'Blanc',stock:3,seuilAlerte:5,stockMax:20,peremption:'2027-03-10'},
+    {id:'m3',nom:'Augmentin',dci:'Amoxicilline/Ac. clavulanique',dosage:'1g',forme:'cp',categorie:'Anti-infectieux',localisation:'E1-T2-C1',couleur:'Jaune',stock:12,seuilAlerte:4,stockMax:24,peremption:'2026-08-20'},
+    {id:'m4',nom:'Metformine EG',dci:'Metformine',dosage:'500 mg',forme:'cp',categorie:'Endocrinologie',localisation:'E2-T1-C1',couleur:'Blanc',stock:15,seuilAlerte:6,stockMax:40,peremption:'2027-01-05'},
+    {id:'m5',nom:'Inexium',dci:'Esoméprazole',dosage:'40 mg',forme:'gel',categorie:'Gastro-entérologie',localisation:'E1-T2-C3',couleur:'Rose',stock:2,seuilAlerte:4,stockMax:20,peremption:'2026-07-15'},
+    {id:'m6',nom:'Lasilix',dci:'Furosémide',dosage:'40 mg',forme:'cp',categorie:'Cardiovasculaire',localisation:'E2-T1-C2',couleur:'Bleu',stock:18,seuilAlerte:5,stockMax:30,peremption:'2027-06-30'},
+    {id:'m7',nom:'Morphine Aguettant',dci:'Morphine sulfate',dosage:'10 mg/5 ml',forme:'ampoule',categorie:'Analgésique',localisation:'A-STUPEF',couleur:'Rouge',stock:4,seuilAlerte:3,stockMax:10,peremption:'2026-09-15'},
+    {id:'m8',nom:'NaCl 0,9%',dci:'Chlorure de sodium',dosage:'500ml',forme:'flacon',categorie:'Autre',localisation:'E3-T1-C1',couleur:'Transparent',stock:25,seuilAlerte:10,stockMax:50,peremption:'2027-05-20'},
+    {id:'m9',nom:'Kardégic 75mg',dci:'Acide acétylsalicylique',dosage:'75 mg',forme:'sachet',categorie:'Cardiovasculaire',localisation:'E2-T2-C1',couleur:'Blanc',stock:20,seuilAlerte:8,stockMax:40,peremption:'2027-02-28'},
+    {id:'m10',nom:'Xarelto',dci:'Rivaroxaban',dosage:'20 mg',forme:'cp',categorie:'Cardiovasculaire',localisation:'E2-T2-C2',couleur:'Beige',stock:6,seuilAlerte:4,stockMax:20,peremption:'2026-11-30'},
+    {id:'m11',nom:'Amoxicilline Mylan',dci:'Amoxicilline',dosage:'500 mg',forme:'gel',categorie:'Anti-infectieux',localisation:'E1-T2-C2',couleur:'Jaune',stock:9,seuilAlerte:4,stockMax:20,peremption:'2026-08-01'},
+    {id:'m12',nom:'Doliprane Pédiatrique',dci:'Paracétamol',dosage:'100 mg/ml',forme:'flacon',categorie:'Analgésique',localisation:'E1-T1-C3',couleur:'Orange',stock:5,seuilAlerte:3,stockMax:12,peremption:'2026-07-15'},
+    {id:'m13',nom:'Spasfon',dci:'Phloroglucinol',dosage:'80 mg',forme:'cp',categorie:'Gastro-entérologie',localisation:'E1-T2-C4',couleur:'Blanc',stock:14,seuilAlerte:5,stockMax:24,peremption:'2027-04-30'},
+    {id:'m14',nom:'Dafalgan',dci:'Paracétamol',dosage:'500 mg',forme:'cp',categorie:'Analgésique',localisation:'E1-T1-C4',couleur:'Blanc',stock:22,seuilAlerte:8,stockMax:40,peremption:'2027-08-20'},
+    {id:'m15',nom:'Lexomil',dci:'Bromazépam',dosage:'6 mg',forme:'cp',categorie:'Neurologie',localisation:'E2-T3-C1',couleur:'Rose',stock:3,seuilAlerte:2,stockMax:10,peremption:'2026-09-30'},
+    {id:'m16',nom:'Lysanxia',dci:'Prazépam',dosage:'10 mg',forme:'cp',categorie:'Neurologie',localisation:'E2-T3-C2',couleur:'Blanc',stock:7,seuilAlerte:3,stockMax:15,peremption:'2027-03-15'},
+    {id:'m17',nom:'Kardégic 160mg',dci:'Acide acétylsalicylique',dosage:'160 mg',forme:'sachet',categorie:'Cardiovasculaire',localisation:'E2-T2-C3',couleur:'Blanc',stock:10,seuilAlerte:4,stockMax:20,peremption:'2026-10-05'},
+    {id:'m18',nom:'Bisoprolol EG',dci:'Bisoprolol',dosage:'5 mg',forme:'cp',categorie:'Cardiovasculaire',localisation:'E2-T2-C4',couleur:'Blanc',stock:16,seuilAlerte:5,stockMax:30,peremption:'2027-02-10'},
+    {id:'m19',nom:'Amlodipine Teva',dci:'Amlodipine',dosage:'5 mg',forme:'cp',categorie:'Cardiovasculaire',localisation:'E2-T2-C5',couleur:'Blanc',stock:12,seuilAlerte:4,stockMax:24,peremption:'2027-05-01'},
+    {id:'m20',nom:'Pantoprazole Mylan',dci:'Pantoprazole',dosage:'40 mg',forme:'cp',categorie:'Gastro-entérologie',localisation:'E1-T3-C1',couleur:'Beige',stock:8,seuilAlerte:4,stockMax:20,peremption:'2027-01-20'},
+    {id:'m21',nom:'Lovenox',dci:'Enoxaparine sodique',dosage:'4000 UI',forme:'ampoule',categorie:'Cardiovasculaire',localisation:'E2-T2-C6',couleur:'Beige',stock:5,seuilAlerte:3,stockMax:15,peremption:'2026-08-30'},
+    {id:'m22',nom:'Solupred',dci:'Prednisolone',dosage:'20 mg',forme:'cp',categorie:'Autre',localisation:'E3-T1-C2',couleur:'Orange',stock:6,seuilAlerte:3,stockMax:15,peremption:'2027-06-15'},
+    {id:'m23',nom:'Ventoline',dci:'Salbutamol',dosage:'100 µg',forme:'flacon',categorie:'Respiratoire',localisation:'E3-T2-C1',couleur:'Bleu clair',stock:4,seuilAlerte:2,stockMax:10,peremption:'2027-07-30'},
+    {id:'m24',nom:'Alvesco',dci:'Ciclésonide',dosage:'160 µg',forme:'flacon',categorie:'Respiratoire',localisation:'E3-T2-C2',couleur:'Rouge',stock:3,seuilAlerte:2,stockMax:8,peremption:'2026-09-10'},
+    {id:'m25',nom:'Methotrexate Medac',dci:'Méthotrexate',dosage:'2,5 mg',forme:'cp',categorie:'Autre',localisation:'CHEMO-C1',couleur:'Jaune',stock:2,seuilAlerte:2,stockMax:8,peremption:'2026-11-15'},
+    {id:'m26',nom:'Tramadol Arrow',dci:'Tramadol',dosage:'50 mg',forme:'gel',categorie:'Analgésique',localisation:'E1-T1-C5',couleur:'Vert',stock:8,seuilAlerte:4,stockMax:20,peremption:'2027-04-10'},
+    {id:'m27',nom:'Ixprim',dci:'Tramadol/Paracétamol',dosage:'37,5/325 mg',forme:'cp',categorie:'Analgésique',localisation:'E1-T1-C6',couleur:'Blanc',stock:6,seuilAlerte:4,stockMax:16,peremption:'2026-10-20'},
+    {id:'m28',nom:'Atarax',dci:'Hydroxyzine',dosage:'25 mg',forme:'cp',categorie:'Neurologie',localisation:'E2-T3-C3',couleur:'Orange',stock:10,seuilAlerte:4,stockMax:20,peremption:'2027-03-25'},
+    {id:'m29',nom:'Zovirax',dci:'Aciclovir',dosage:'200 mg',forme:'cp',categorie:'Anti-infectieux',localisation:'E1-T2-C5',couleur:'Bleu',stock:4,seuilAlerte:3,stockMax:12,peremption:'2026-12-01'},
+    {id:'m30',nom:'Diflucan',dci:'Fluconazole',dosage:'150 mg',forme:'gel',categorie:'Anti-infectieux',localisation:'E1-T2-C6',couleur:'Turquoise',stock:3,seuilAlerte:2,stockMax:8,peremption:'2027-02-20'}
+  ]);
+  var now=Date.now();
+  if(getStups().length===0){
+    setStups([
+      {id:'stup1',nom:'Morphine sulfate 10mg/ml',forme:'ampoule',cond:'5 ampoules/boîte',stock:10,dotation:10,lot:'LOT250401',peremption:'2026-09-15',loc:'Compartiment A',remarques:'Conserver entre 15 et 25°C'},
+      {id:'stup2',nom:'Morphine sulfate 20mg/10ml',forme:'ampoule',cond:'5 ampoules/boîte',stock:5,dotation:5,lot:'LOT250402',peremption:'2027-01-20',loc:'Compartiment A',remarques:''},
+      {id:'stup3',nom:'Midazolam 5mg/5ml',forme:'ampoule',cond:'10 ampoules/boîte',stock:10,dotation:10,lot:'LOT250501',peremption:'2026-08-30',loc:'Compartiment B',remarques:'Stupéfiant — ordonnance sécurisée'},
+      {id:'stup4',nom:'Fentanyl 50µg/ml',forme:'ampoule',cond:'5 ampoules/boîte',stock:5,dotation:5,lot:'LOT250310',peremption:'2026-07-10',loc:'Compartiment B',remarques:'Analgésique opioïde — manipuler avec précaution'},
+      {id:'stup5',nom:'Oxycodone 10mg LP',forme:'cp',cond:'28 cp/boîte',stock:28,dotation:28,lot:'LOT250601',peremption:'2027-03-31',loc:'Compartiment C',remarques:''}
+    ]);
+  }
+  DB.set('pa_hist',[
+    {ts:new Date(now-1*864e5).toISOString(),medId:'m1',medNom:'Doliprane 1000 mg',qty:2,forme:'cp',loc:'E1-T1-C1'},
+    {ts:new Date(now-2*864e5).toISOString(),medId:'m1',medNom:'Doliprane 1000 mg',qty:1,forme:'cp',loc:'E1-T1-C1'},
+    {ts:new Date(now-3*864e5).toISOString(),medId:'m3',medNom:'Augmentin 1g',qty:1,forme:'cp',loc:'E1-T2-C1'},
+    {ts:new Date(now-4*864e5).toISOString(),medId:'m6',medNom:'Lasilix 40 mg',qty:1,forme:'cp',loc:'E2-T1-C2'},
+    {ts:new Date(now-5*864e5).toISOString(),medId:'m2',medNom:'Ibuprofène Mylan 400 mg',qty:2,forme:'cp',loc:'E1-T1-C2'},
+    {ts:new Date(now-6*864e5).toISOString(),medId:'m9',medNom:'Kardégic 75mg',qty:1,forme:'sachet',loc:'E2-T2-C1'},
+    {ts:new Date(now-8*864e5).toISOString(),medId:'m1',medNom:'Doliprane 1000 mg',qty:3,forme:'cp',loc:'E1-T1-C1'},
+    {ts:new Date(now-10*864e5).toISOString(),medId:'m4',medNom:'Metformine EG 500 mg',qty:1,forme:'cp',loc:'E2-T1-C1'}
+  ]);
+}
+
+// ── EMAILJS CONFIG ───────────────────────────────────────────────────────────
+function EJS_DEST1(){ return getEJS().dest1||'j.taouk@colisee.fr'; }
+function EJS_DEST2(){ return getEJS().dest2||'m.avanzato@colisee.fr'; }
+var EJS_SUBJECT = "Réapprovisionnement de l'armoire d'urgence";
+
+function getEJS(){ return DB.get('pa_ejs',{sid:'',tid:'',key:'',dest1:'j.taouk@colisee.fr',dest2:'m.avanzato@colisee.fr'}); }
+function saveEJS(){
+  DB.set('pa_ejs',{
+    dest1:document.getElementById('ejs-dest1').value.trim()||'j.taouk@colisee.fr',
+    dest2:document.getElementById('ejs-dest2').value.trim()||'m.avanzato@colisee.fr',
+    sid:document.getElementById('ejs-sid').value.trim(),
+    tid:document.getElementById('ejs-tid').value.trim(),
+    key:document.getElementById('ejs-key').value.trim()
+  });
+  setEJSStatus('Configuration sauvegardée','var(--grn)');
+}
+function loadEJSFields(){
+  var e=getEJS();
+  if(document.getElementById('ejs-dest1')) document.getElementById('ejs-dest1').value=e.dest1||'j.taouk@colisee.fr';
+  if(document.getElementById('ejs-dest2')) document.getElementById('ejs-dest2').value=e.dest2||'m.avanzato@colisee.fr';
+  if(document.getElementById('ejs-sid')) document.getElementById('ejs-sid').value=e.sid||'';
+  if(document.getElementById('ejs-tid')) document.getElementById('ejs-tid').value=e.tid||'';
+  if(document.getElementById('ejs-key')) document.getElementById('ejs-key').value=e.key||'';
+}
+function setEJSStatus(msg,col){
+  var el=document.getElementById('ejs-status');
+  if(el){ el.textContent=msg; el.style.color=col||'var(--mut)'; }
+}
+
+function buildReapproBody(){
+  var meds=getMeds();
+  var now=new Date();
+  var conf=getConf();
+  var toRestock=meds.filter(function(m){ return m.stock<m.stockMax; })
+    .sort(function(a,b){ return a.localisation.localeCompare(b.localisation); });
+  if(toRestock.length===0) return null;
+  var nl='\n';
+  var body='REAPPROVISIONNEMENT ARMOIRE D’URGENCE'+nl;
+  body+=(conf.clin||'Clinique du Château de Florans')+nl;
+  body+='Genere le : '+fmtD(now.toISOString())+nl+nl;
+  body+='PRODUITS A REAPPROVISIONNER :'+nl+nl;
+  toRestock.forEach(function(m){
+    var manquant=m.stockMax-m.stock;
+    var crit=m.stock<=m.seuilAlerte?' [CRITIQUE]':'';
+    body+='- '+m.nom+' '+m.dosage+crit+nl;
+    body+='  Localisation : '+formatLoc(m.localisation)+' ('+m.localisation+')'+nl;
+    body+='  Stock actuel : '+m.stock+' / Stock max : '+m.stockMax+nl;
+    body+='  A commander : '+manquant+' unite(s)'+nl+nl;
+  });
+  return body;
+}
+
+function sendReapproEmail(trigger){
+  var e=getEJS();
+  if(!e.sid||!e.tid||!e.key){
+    setEJSStatus('EmailJS non configuré — allez dans Config','var(--wrn)');
+    toast('EmailJS non configuré',true);
+    return;
+  }
+  var body=buildReapproBody();
+  if(!body && trigger!=='test'){
+    setEJSStatus('Aucun réapprovisionnement nécessaire','var(--grn)');
+    return;
+  }
+  emailjs.init(e.key);
+  var params={
+    to_email1:EJS_DEST1(),
+    to_email2:EJS_DEST2(),
+    subject:EJS_SUBJECT,
+    message:body||'Test PharmaArmoire — '+new Date().toLocaleString('fr-FR')
+  };
+  console.log('EmailJS send params:',JSON.stringify(params));
+  emailjs.send(e.sid, e.tid, params)
+  .then(function(resp){
+    console.log('EmailJS success:',JSON.stringify(resp));
+    DB.set('pa_last_reappro_email',new Date().toISOString());
+    setEJSStatus('Email envoyé à '+EJS_DEST1()+' et '+EJS_DEST2(),'var(--grn)');
+    toast('📧 Email réappro envoyé');
+  }).catch(function(err){
+    console.log('EmailJS error:',JSON.stringify(err));
+    setEJSStatus('Erreur : '+(err.text||err.status||JSON.stringify(err)),'var(--red)');
+    toast('Erreur EmailJS',true);
+  });
+}
+function testEmailJS(){ sendReapproEmail('test'); }
+
+function autoCalcCritique(){
+  var max=parseInt(document.getElementById('f-max').value)||20;
+  document.getElementById('f-seuil').value=max===1?0:Math.floor(max/2);
+}
+
+function checkMonthlyPeremScheduler(){
+  var now=new Date();
+  var isFirst=now.getDate()===1;
+  var hour=now.getHours();
+  var lastKey='pa_last_perem_email';
+  var last=DB.get(lastKey,null);
+  var sentThisMonth=false;
+  if(last){
+    var ld=new Date(last);
+    sentThisMonth=(ld.getFullYear()===now.getFullYear()&&ld.getMonth()===now.getMonth());
+  }
+  if(isFirst&&hour>=9&&!sentThisMonth){
+    sendPeremEmail();
+  }
+  setTimeout(checkMonthlyPeremScheduler,30*60*1000);
+}
+
+function sendPeremEmail(){
+  var e=getEJS();
+  if(!e.sid||!e.tid||!e.key){ toast('EmailJS non configuré',true); return; }
+  var meds=getMeds();
+  var stups=getStups();
+  var now=new Date();
+  var lim90=new Date(now.getTime()+90*864e5);
+  var medAlerts=meds.filter(function(m){ return m.peremption&&new Date(m.peremption)<=lim90; })
+    .sort(function(a,b){ return new Date(a.peremption)-new Date(b.peremption); });
+  var stupAlerts=stups.filter(function(s){ return s.peremption&&new Date(s.peremption)<=lim90; })
+    .sort(function(a,b){ return new Date(a.peremption)-new Date(b.peremption); });
+  if(medAlerts.length===0&&stupAlerts.length===0){ toast('Aucune péremption dans les 3 mois'); return; }
+  var nl='\n';
+  var clin=getConf().clin||'Clinique du Château de Florans';
+  var body='ALERTE PEREMPTIONS MENSUELLES'+nl+clin+nl;
+  body+='Produits perimant dans les 3 prochains mois'+nl;
+  body+='Genere le : '+fmtD(now.toISOString())+nl+nl;
+  if(medAlerts.length>0){
+    body+='ARMOIRE URGENCE ('+medAlerts.length+' produit(s)) :'+nl+nl;
+    medAlerts.forEach(function(m){
+      body+='- '+m.nom+' '+m.dosage+nl;
+      body+='  Localisation : '+formatLoc(m.localisation)+nl;
+      body+='  Date de peremption : '+fmtD(m.peremption)+nl;
+      body+='  Stock : '+m.stock+' unite(s)'+nl+nl;
+    });
+  }
+  if(stupAlerts.length>0){
+    body+='COFFRE STUPEFIANTS ('+stupAlerts.length+' produit(s)) :'+nl+nl;
+    stupAlerts.forEach(function(s){
+      body+='- '+s.nom+nl;
+      body+='  Date de peremption : '+fmtD(s.peremption)+nl;
+      body+='  Stock : '+s.stock+' unite(s)'+nl+nl;
+    });
+  }
+  emailjs.init(e.key);
+  emailjs.send(e.sid,e.tid,{
+    to_email1:EJS_DEST1(),
+    to_email2:EJS_DEST2(),
+    subject:'Péremptions à 3 mois - '+clin,
+    message:body
+  }).then(function(){
+    DB.set('pa_last_perem_email',now.toISOString());
+    toast('Email péremptions envoyé');
+  }).catch(function(err){
+    console.log('Perem email error:',JSON.stringify(err));
+    toast('Erreur envoi péremptions',true);
+  });
+}
+
+function checkFridayScheduler(){
+  var now=new Date();
+  var last=DB.get('pa_last_reappro_email',null);
+  var sentToday=last&&(new Date(last).toDateString()===now.toDateString());
+  if(now.getDay()===5 && now.getHours()>=9 && !sentToday){
+    sendReapproEmail('friday');
+  }
+  setTimeout(checkFridayScheduler,30*60*1000);
+}
+
+function checkCriticalStock(){
+  var meds=getMeds();
+  var now=new Date();
+  var alerted=DB.get('pa_crit_alerted',{});
+  // Reset flag for products restocked above critical
+  var changed=false;
+  meds.forEach(function(m){
+    if(alerted[m.id]&&m.stock>m.seuilAlerte){ delete alerted[m.id]; changed=true; }
+  });
+  if(changed) DB.set('pa_crit_alerted',alerted);
+  // New critical products not yet alerted
+  var newCrit=meds.filter(function(m){
+    return m.stock<=m.seuilAlerte&&m.seuilAlerte>0&&!alerted[m.id];
+  });
+  if(newCrit.length===0) return;
+  // Mark as alerted
+  newCrit.forEach(function(m){ alerted[m.id]=true; });
+  DB.set('pa_crit_alerted',alerted);
+  var e=getEJS();
+  if(!e.sid||!e.tid||!e.key){
+    toast('Stock critique — configurez EmailJS pour alertes auto',true);
+    return;
+  }
+  emailjs.init(e.key);
+  var nl='\n';
+  var body='ALERTE STOCK CRITIQUE — ACTION IMMEDIATE REQUISE'+nl;
+  body+=(getConf().clin||'Clinique du Château de Florans')+nl;
+  body+='Date : '+now.toLocaleString('fr-FR')+nl+nl;
+  body+='Produits ayant atteint leur seuil critique'+nl;
+  body+='(email unique par produit — reinitialise apres reapprovisionnement) :'+nl+nl;
+  newCrit.forEach(function(m){
+    body+='- '+m.nom+' '+m.dosage+nl;
+    body+='  Localisation : '+formatLoc(m.localisation)+nl;
+    body+='  Stock actuel : '+m.stock+' / Seuil critique : '+m.seuilAlerte+nl;
+    body+='  A commander : '+(m.stockMax-m.stock)+' unite(s)'+nl+nl;
+  });
+  emailjs.send(e.sid,e.tid,{
+    to_email1:EJS_DEST1(),
+    to_email2:EJS_DEST2(),
+    subject:'STOCK CRITIQUE - '+(getConf().clin||'PharmaArmoire'),
+    message:body
+  }).then(function(){
+    console.log('EmailJS critical alert sent');
+    toast('Alerte critique envoyée pour '+newCrit.length+' produit(s)');
+  }).catch(function(err){
+    console.log('EmailJS critical error:',JSON.stringify(err));
+    toast('Erreur alerte critique',true);
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadDemo();
+setTimeout(checkMonthlyAlerts,2000);
+setTimeout(checkFridayScheduler,3000);
+setTimeout(checkMonthlyPeremScheduler,4000);
+setTimeout(checkCriticalStock,5000);
+</script>
+</body>
+</html>
